@@ -1,5 +1,6 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import Login from './Components/Account/Login'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
 

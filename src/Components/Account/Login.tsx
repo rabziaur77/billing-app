@@ -1,21 +1,8 @@
-import React, { useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from 'react';
+import useLoginLogic from './LoginLogic';
 
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        if (!email || !password) {
-            setError('Please enter both email and password.');
-            return;
-        }
-        // TODO: Implement actual login logic here
-        alert(`Logged in as ${email}`);
-    };
+    const { loginModel, error, handleSubmit, inputhandler, isLoading } = useLoginLogic();
 
     return (
         <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -28,10 +15,11 @@ const Login: React.FC = () => {
                 <label htmlFor="email" className="form-label">Email</label>
                 <input
                     id="email"
+                    name='email'
                     type="email"
                     className="form-control"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    value={loginModel.email}
+                    onChange={inputhandler}
                     required
                 />
                 </div>
@@ -39,15 +27,24 @@ const Login: React.FC = () => {
                 <label htmlFor="password" className="form-label">Password</label>
                 <input
                     id="password"
+                    name='password'
                     type="password"
                     className="form-control"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    value={loginModel.password}
+                    onChange={inputhandler}
                     required
                 />
                 </div>
                 {error && <div className="alert alert-danger py-2">{error}</div>}
-                <button type="submit" className="btn btn-primary w-100">Login</button>
+                <button type="submit" disabled={isLoading} 
+                className="btn btn-primary w-100">
+                    {
+                        isLoading ? (
+                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        ) : null
+                    }
+                    Login
+                </button>
             </form>
             <footer className="mt-4 text-center text-muted" style={{ fontSize: '0.95rem' }}>
                 &copy; {new Date().getFullYear()} AccurateAppSolution. All rights reserved.
