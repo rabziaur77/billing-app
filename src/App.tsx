@@ -4,7 +4,7 @@ import Login from './Components/Account/Login'
 function App() {
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename='/billing-app'>
       <Routes>
         <Route path="/" element={<Login/>} />
         <Route path="/dashboard" element={<h2>Dashboard</h2>} />
