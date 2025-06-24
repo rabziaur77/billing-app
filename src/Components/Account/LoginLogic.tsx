@@ -19,7 +19,7 @@ const useLoginLogic = () => {
             return;
         }
 
-        let currentPage = window.location.hostname;
+        let currentPage = window.location.hostname.split(".")[0];
 
         const body: Object = {
             email: loginModel.email,
