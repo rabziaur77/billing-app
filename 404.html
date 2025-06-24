@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0; url=/" />
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <script type="text/javascript">
+      // Save the full path before redirecting
+      sessionStorage.redirect = location.pathname + location.search + location.hash;
+      location.replace("/");
+    </script>
   </head>
   <body>
     Redirecting...
