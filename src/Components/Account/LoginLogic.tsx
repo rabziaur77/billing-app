@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { API_SERVICE } from '../../Service/API/API_Service';
+import { useAuth } from '../../Service/ContextService/AuthContext';
 
 const useLoginLogic = () => {
+    const auth = useAuth();
     const [loginModel, setLoginModel] = useState({
         email: '',
         password: ''
@@ -21,7 +23,7 @@ const useLoginLogic = () => {
 
         let currentPage = window.location.hostname.split(".")[0];
 
-        const body: Object = {
+        const body = {
             email: loginModel.email,
             password: loginModel.password,
             tenantSlug: currentPage.includes("localhost") ? "billing" : currentPage
@@ -33,8 +35,7 @@ const useLoginLogic = () => {
 
             if (response.status === 200) {
                 const result = response.data;
-                localStorage.setItem('token', JSON.stringify(result));
-                window.location.href = '/dashboard';
+                auth.login(result);
             } else {
                 setError('Login failed. Please check your credentials.');
             }
