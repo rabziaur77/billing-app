@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface UserInfo{
@@ -17,9 +17,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
+    const [isReady, setIsReady] = useState<boolean>(false);
     const [userInfo, setUserInfo] = useState<UserInfo>({role:'', tenant: ''});
     const navigate = useNavigate();
     
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setTimeout(() => {
+                // Simulate an API call to validate the parsedToken 
+                const parsedToken = JSON.parse(token);
+                setIsAuthenticated(true);
+                setUserInfo({role: parsedToken.role, tenant: parsedToken.tenantSlug});
+                setIsReady(true);
+            }, 1000); 
+        }
+        else {
+            setIsAuthenticated(false);
+            setUserInfo({role: '', tenant: ''});
+            setIsReady(true);
+        }
+        
+    }, []);
 
     const login = (token: any) => {
         localStorage.setItem('token', JSON.stringify(token));
@@ -36,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, login, logout, userInfo }}>
-            {children}
+            {isReady ? children : <div>Loading...</div>}
         </AuthContext.Provider>
     );
 };

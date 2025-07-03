@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import AuthHOC, { LoginRedirectAuth } from './Service/ContextService/ProtectedRoute';
 import { AuthProvider } from './Service/ContextService/AuthContext';
 import Home from './Components/Home/Index';
-import CreateInvoicePage from './Components/invoices/Generate';
+import CreateInvoicePage from './Components/invoices/MainComponent/Generate';
 import Layout from './Components/MainLayout/Layout';
 
 const LoginRedirect = LoginRedirectAuth(Login);
@@ -14,7 +14,6 @@ const Invoices = AuthHOC(CreateInvoicePage);
 
 function App() {
   return (
-
     <BrowserRouter>
       <AuthProvider>
         <Routes>

@@ -1,17 +1,5 @@
 import {useState} from 'react';
-
-interface Tax {
-    name: string;
-    rate: number;
-}
-
-interface LineItem {
-    description: string;
-    quantity: number;
-    rate: number;
-    amount: number;
-    taxList: Tax[];
-}
+import type { LineItem, Tax } from '../../InvoiceModel/Models';
 
 interface Prop{
     ItemData?: (Items: any)=> void; 
@@ -60,7 +48,11 @@ const useItemLogic = ({ItemData}:Prop) => {
 
     const removeLineItem = (idx: number) => {
         if (lineItems.length === 1) return;
-        setLineItems(lineItems.filter((_, i) => i !== idx));
+        const updatedItems = lineItems.filter((_, i) => i !== idx)
+        setLineItems(updatedItems);
+        if (ItemData) {
+            ItemData(updatedItems);
+        }
     };
 
     const addLineItem = () => {

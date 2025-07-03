@@ -1,8 +1,13 @@
 import React from "react";
 import useInvoiceHeader from "./InvoiceHeaderLogic";
+import type { CustomerInvoice } from "../../InvoiceModel/Models";
 
-const InvoiceHeader: React.FC = () => {
-    const {customer, handleInputChange,invoiceNumber} = useInvoiceHeader();
+interface Prop {
+    SetCustomer: (customer: CustomerInvoice) => void;
+}
+
+const InvoiceHeader: React.FC<Prop> = ({ SetCustomer }) => {
+    const { customer, handleInputChange } = useInvoiceHeader({ SetCustomer });
     return (
         <>
         <div className="row mb-3">
@@ -11,6 +16,7 @@ const InvoiceHeader: React.FC = () => {
                         <input
                             type="text"
                             className="form-control"
+                            name="Name"
                             value={customer.Name}
                             onChange={handleInputChange}
                             required
@@ -21,6 +27,7 @@ const InvoiceHeader: React.FC = () => {
                         <input
                             type="date"
                             className="form-control"
+                            name="InvoiceDate"
                             value={customer.InvoiceDate}
                             onChange={handleInputChange}
                             required
@@ -31,6 +38,7 @@ const InvoiceHeader: React.FC = () => {
                         <input
                             type="date"
                             className="form-control"
+                            name="DueDate"
                             value={customer.DueDate}
                             onChange={handleInputChange}
                             required
@@ -43,7 +51,7 @@ const InvoiceHeader: React.FC = () => {
                         <input
                             type="text"
                             className="form-control"
-                            value={invoiceNumber}
+                            value={customer.InvoiceNumber}
                             readOnly
                         />
                     </div>
