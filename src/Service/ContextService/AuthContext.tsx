@@ -44,8 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('token', JSON.stringify(token));
         setIsAuthenticated(true);
         setUserInfo({role: token.role, tenant: token.tenantSlug});
-        //navigate('/dashboard');
-        window.location.href = '/';
+        navigate('/dashboard');
     }
 
     const logout = () => {
