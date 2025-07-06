@@ -25,6 +25,7 @@ const InvoiceView = ({ invoiceData }: { invoiceData: InvoiceReceipt }) => {
                 <th>Description</th>
                 <th>Qty</th>
                 <th>Rate</th>
+                <th>Discount</th>
                 <th>Tax</th>
                 <th>Amount</th>
               </tr>
@@ -35,6 +36,7 @@ const InvoiceView = ({ invoiceData }: { invoiceData: InvoiceReceipt }) => {
                   <td>{item.description}</td>
                   <td>{item.quantity}</td>
                   <td>{item.rate}</td>
+                  <td>{item.discount?.toFixed(2) || 0}</td>
                   <td>{item.taxList.map((t: Tax) => `${t.name} (${t.rate}%)`).join(", ")}</td>
                   <td>{item.amount.toFixed(2)}</td>
                 </tr>

@@ -13,7 +13,7 @@ const useItemLogic = ({ItemData}:Prop) => {
     ];
 
     const [lineItems, setLineItems] = useState<LineItem[]>([
-            { description: "", quantity: 1, rate: 0, amount: 0, taxList: [] },
+            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
         ]);
     
     const handleLineItemChange = (
@@ -30,7 +30,13 @@ const useItemLogic = ({ItemData}:Prop) => {
                     ? numValue
                     : updatedItems[idx].quantity) *
                 (field === "rate" ? numValue : updatedItems[idx].rate);
-        } else if (field === "description") {
+        }else if (field === "discount") {
+            const discountValue = Number(value);
+            updatedItems[idx][field] = discountValue;
+            updatedItems[idx].amount =
+                (updatedItems[idx].quantity * updatedItems[idx].rate) - discountValue;
+        } 
+        else if (field === "description") {
             updatedItems[idx][field] = value as string;
         }
         else if (field === "taxList") {
@@ -58,7 +64,7 @@ const useItemLogic = ({ItemData}:Prop) => {
     const addLineItem = () => {
         setLineItems([
             ...lineItems,
-            { description: "", quantity: 1, rate: 0, amount: 0, taxList: [] },
+            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
         ]);
     };
 

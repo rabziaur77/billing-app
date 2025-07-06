@@ -18,6 +18,7 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData}) => {
                             <th>Description</th>
                             <th style={{ width: "100px" }}>Quantity</th>
                             <th style={{ width: "120px" }}>Rate</th>
+                            <th style={{ width: "120px" }}>Discount</th>
                             <th style={{ width: "220px" }}>Tax</th>
                             <th style={{ width: "120px" }}>Amount</th>
                             <th style={{ width: "50px" }}></th>
@@ -60,6 +61,18 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData}) => {
                                             handleLineItemChange(idx, "rate", e.target.value)
                                         }
                                         required
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        min={0}
+                                        step="0.01"
+                                        value={item.discount}
+                                        onChange={(e) =>
+                                            handleLineItemChange(idx, "discount", e.target.value)
+                                        }
                                     />
                                 </td>
                                 <td>
