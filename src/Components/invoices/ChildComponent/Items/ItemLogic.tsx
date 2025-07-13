@@ -1,20 +1,37 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import type { LineItem, Tax } from '../../InvoiceModel/Models';
+import { API_SERVICE } from '../../../../Service/API/API_Service';
 
 interface Prop{
     ItemData?: (Items: any)=> void; 
 }
 
 const useItemLogic = ({ItemData}:Prop) => {
-    const TaxList: Tax[] = [
-        { name: "SGST", rate: 9 },
-        { name: "CGST", rate: 9 },
-        { name: "IGST", rate: 0 },
-    ];
-
+    const [TaxList, setTaxList] = useState<Tax[]>([]);
     const [lineItems, setLineItems] = useState<LineItem[]>([
             { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
         ]);
+
+    useEffect(() => {
+        loadTaxList();
+    }, []);
+
+    const loadTaxList = async () => {
+        try {
+            const response = await API_SERVICE.get('invoice-api/Tax/GetTaxes');
+
+            if (response.status === 200) {
+                const taxList: Tax[] = response.data.map((tax: any) => ({
+                    name: tax.name,
+                    rate: tax.rate
+                }));
+                
+                setTaxList(taxList);
+            }
+        } catch (error) {
+            console.error("Error loading tax list:", error);
+        }
+    };
     
     const handleLineItemChange = (
         idx: number,

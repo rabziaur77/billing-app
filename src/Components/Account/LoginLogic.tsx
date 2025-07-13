@@ -30,7 +30,7 @@ const useLoginLogic = () => {
         };
 
         try {
-            const response = await API_SERVICE.post('api/Account/loginuser', body);
+            const response = await API_SERVICE.post('auth-api/Account/loginUser', body);
             setIsLoading(false);
 
             if (response.status === 200) {
