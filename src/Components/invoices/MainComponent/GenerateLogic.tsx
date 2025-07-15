@@ -117,7 +117,7 @@ const useGenerateInvoiceLogic = () => {
                 rate: item.rate,
                 discount: item.discount,
                 amount: item.amount,
-                taxList: item.taxList.map(t => t.rate)
+                taxList: item.taxList.map(t => t.id)
             }))
         };
     }

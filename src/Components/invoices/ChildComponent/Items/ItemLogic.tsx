@@ -22,6 +22,7 @@ const useItemLogic = ({ItemData}:Prop) => {
 
             if (response.status === 200) {
                 const taxList: Tax[] = response.data.map((tax: any) => ({
+                    id: tax.id,
                     name: tax.name,
                     rate: tax.rate
                 }));
@@ -36,7 +37,7 @@ const useItemLogic = ({ItemData}:Prop) => {
     const handleLineItemChange = (
         idx: number,
         field: keyof LineItem,
-        value: string | number | string[]
+        value: string | number | string[] | number[]
     ) => {
         const updatedItems = [...lineItems];
         if (field === "quantity" || field === "rate") {
@@ -57,10 +58,9 @@ const useItemLogic = ({ItemData}:Prop) => {
             updatedItems[idx][field] = value as string;
         }
         else if (field === "taxList") {
-            const selectedNames = value as string[];
-            
+            const selectedIds = value as number[];
             updatedItems[idx].taxList = TaxList.filter(tax =>
-                selectedNames.includes(tax.name)
+                selectedIds.includes(tax.id)
             );
         }
         setLineItems(updatedItems);

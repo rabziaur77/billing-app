@@ -79,11 +79,11 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData}) => {
                                     <Select
                                         isMulti
                                         options={TaxList.map(tax => ({
-                                            value: tax.name,
+                                            value: tax.id,
                                             label: `${tax.name} (${tax.rate}%)`,
                                         }))}
                                         value={item.taxList.map(tax => ({
-                                            value: tax.name,
+                                            value: tax.id,
                                             label: `${tax.name} (${tax.rate}%)`,
                                         }))}
                                         onChange={(selectedOptions) => {
