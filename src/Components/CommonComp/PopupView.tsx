@@ -1,13 +1,13 @@
-import React, { type ReactNode } from "react";
+import { type ReactNode } from "react";
 interface PopupViewProps {
     children: ReactNode;
     onClose?: () => void;
 }
 
-const PopupView: React.FC<PopupViewProps> = ({ children, onClose }) => {
+const PopupView= ({ children, onClose }: PopupViewProps) => {
     return (
         <div className="popup-view" style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", background: "rgba(0,0,0,0.5)", zIndex: 1000 }}>
-            <div style={{ background: "#fff", margin: "5% auto",borderRadius: 8, width: "80%", maxWidth: 600 }}>
+            <div style={{ background: "#fff", margin: "5% auto",borderRadius: 8, width: "80%", maxWidth: 800 }}>
                 <div style={{ display: "flex", justifyContent: "flex-end" }}><button
                     onClick={onClose}
                     style={{

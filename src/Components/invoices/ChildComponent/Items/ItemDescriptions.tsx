@@ -1,13 +1,15 @@
 import React from "react";
 import Select from "react-select";
 import useItemLogic from "./ItemLogic";
+import type { LineItem } from "../../InvoiceModel/Models";
 
 interface Prop{
     ItemData?: (item:any)=> void; 
+    items: LineItem[];
 }
 
-const InvoiceDescription: React.FC<Prop> = ({ItemData}) => {
-    const { addLineItem, handleLineItemChange, lineItems, removeLineItem, TaxList } = useItemLogic({ItemData});
+const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
+    const { addLineItem, handleLineItemChange, lineItems, removeLineItem, TaxList } = useItemLogic({ItemData, items});
     return (
         <>
             <h5>Line Items</h5>

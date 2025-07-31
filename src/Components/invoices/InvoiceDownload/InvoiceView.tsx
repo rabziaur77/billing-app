@@ -46,8 +46,8 @@ const InvoiceView = ({ invoiceData }: { invoiceData: InvoiceReceipt }) => {
 
           <div className="text-end">
             <p><strong>Subtotal:</strong> ₹{invoiceData.subtotal.toFixed(2)}</p>
-            <p><strong>Tax:</strong> ₹{invoiceData.tax.toFixed(2)}</p>
-            <p><strong>Total:</strong> ₹{invoiceData.total.toFixed(2)}</p>
+            {/* <p><strong>Tax:</strong> ₹{invoiceData.tax.toFixed(2)}</p> */}
+            <p><strong>Grand Total:</strong> ₹{invoiceData.total.toFixed(2)}</p>
           </div>
         </div>
       </div>

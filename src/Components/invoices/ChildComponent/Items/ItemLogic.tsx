@@ -4,13 +4,20 @@ import { API_SERVICE } from '../../../../Service/API/API_Service';
 
 interface Prop{
     ItemData?: (Items: any)=> void; 
+    items: LineItem[];
 }
 
-const useItemLogic = ({ItemData}:Prop) => {
+const useItemLogic = ({ItemData, items}:Prop) => {
     const [TaxList, setTaxList] = useState<Tax[]>([]);
     const [lineItems, setLineItems] = useState<LineItem[]>([
             { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
         ]);
+
+    useEffect(() => {
+        if (items && items.length > 0) {
+            setLineItems(items);
+        }
+    }, [items]);
 
     useEffect(() => {
         loadTaxList();

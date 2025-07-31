@@ -14,7 +14,8 @@ const CreateInvoicePage: React.FC = () => {
         SetCustomer,
         invoiceReceipt,
         InvoiceShow,
-        setInvoiceShow
+        setInvoiceShow,
+        itemData
     } = useGenerateInvoiceLogic();
 
     return (
@@ -22,10 +23,10 @@ const CreateInvoicePage: React.FC = () => {
             <h2 className="mb-4">Create Invoice</h2>
             <form onSubmit={submitForm}>
                 {/* Invoice Header */}
-                <InvoiceHeader SetCustomer={SetCustomer} />
+                <InvoiceHeader SetCustomer={SetCustomer} IsNewInvoice={InvoiceShow} />
 
                 {/* Select Item for Invoice */}
-                <InvoiceDescription ItemData={ItemsData} />
+                <InvoiceDescription items={itemData} ItemData={ItemsData} />
 
                 {/* Invoice SubTotal */}
                 <InvoiceSubtotal subtotal={itemsCost.subTotal} taxAmount={itemsCost.taxAmount} total={itemsCost.total} />

@@ -11,8 +11,9 @@ import "./LayoutStyle.css";
 
 const menuItems = [
     { icon: <FaTachometerAlt />, label: "Dashboard", url: "/dashboard" },
-    { icon: <FaUsers />, label: "Users", url: "/settings" },
+    // { icon: <FaUsers />, label: "Users", url: "/settings" },
     { icon: <FaFileInvoiceDollar />, label: "Invoices", url: "/invoices" },
+    { icon: <FaFileInvoiceDollar />, label: "Invoice History", url: "/invoice-history" },
 ];
 
 const Layout: React.FC = () => {

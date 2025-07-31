@@ -4,10 +4,11 @@ import type { CustomerInvoice } from "../../InvoiceModel/Models";
 
 interface Prop {
     SetCustomer: (customer: CustomerInvoice) => void;
+    IsNewInvoice: boolean;
 }
 
-const InvoiceHeader: React.FC<Prop> = ({ SetCustomer }) => {
-    const { customer, handleInputChange } = useInvoiceHeader({ SetCustomer });
+const InvoiceHeader: React.FC<Prop> = ({ SetCustomer, IsNewInvoice }) => {
+    const { customer, handleInputChange } = useInvoiceHeader({ SetCustomer, IsNewInvoice });
     return (
         <>
         <div className="row mb-3">

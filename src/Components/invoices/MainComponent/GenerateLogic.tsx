@@ -12,9 +12,9 @@ interface InvoiceItemRequest {
     description: string;
     quantity: number;
     rate: number;
-    discount?: number;          // still optional
-    amount: number;             // pre‑calculated or server‑side, your call
-    taxList: number[];             // we keep the richer Tax[] model here
+    discount?: number;
+    amount: number;
+    taxList: number[];
 }
 
 interface InvoiceRequest {
@@ -27,7 +27,9 @@ interface InvoiceRequest {
 const useGenerateInvoiceLogic = () => {
     const [itemsCost, setItemsCost] = useState({ subTotal: Number(0), taxAmount: Number(0), total: Number(0) });
     const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
-    const [itemData, setItemData] = useState<LineItem[]>([]);
+    const [itemData, setItemData] = useState<LineItem[]>([
+        { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
+    ]);
     const [InvoiceShow, setInvoiceShow] = useState<boolean>(false);
     const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
         customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" },
@@ -76,8 +78,7 @@ const useGenerateInvoiceLogic = () => {
 
         const invoiceReq = toInvoiceRequest(invoiceReceipt);
 
-        SaveInvoiceRequest(invoiceReq)
-        
+        SaveInvoiceRequest(invoiceReq);
         setInvoiceReceipt(invoiceReceipt);
         setInvoiceShow(true);
     };
@@ -94,10 +95,16 @@ const useGenerateInvoiceLogic = () => {
             if (response.status !== 201) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = response.data;
-            console.log("Invoice saved successfully:", data);
+
+            alert(response.data.status);
+            setCustomer({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
+            setItemData([
+                { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
+            ]);
+            setItemsCost({ subTotal: 0, taxAmount: 0, total: 0 });
         } catch (error) {
             console.error("Error saving invoice:", error);
+            throw error;
         }
     };
 
@@ -132,7 +139,8 @@ const useGenerateInvoiceLogic = () => {
         SetCustomer,
         invoiceReceipt,
         InvoiceShow,
-        setInvoiceShow
+        setInvoiceShow,
+        itemData
     }
 };
 
