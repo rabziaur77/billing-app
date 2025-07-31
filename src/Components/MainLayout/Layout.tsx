@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import {
     FaTachometerAlt,
-    FaUsers,
     FaFileInvoiceDollar,
     FaChevronLeft,
     FaChevronRight,

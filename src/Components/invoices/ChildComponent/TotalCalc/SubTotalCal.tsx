@@ -17,10 +17,10 @@ const InvoiceSubtotal: React.FC<InvoiceSubtotalProps> = ({ subtotal, taxAmount, 
                                 <th>Subtotal</th>
                                 <td>{subtotal.toFixed(2)}</td>
                             </tr>
-                            {/* <tr>
+                            <tr style={{display:'none'}}>
                                 <th>Tax</th>
                                 <td>{taxAmount.toFixed(2)}</td>
-                            </tr> */}
+                            </tr>
                             <tr>
                                 <th>Total</th>
                                 <td>
