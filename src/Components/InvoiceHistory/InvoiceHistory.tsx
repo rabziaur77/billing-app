@@ -27,11 +27,11 @@ const InvoiceHistory: React.FC = () => {
                     {
                         loading ? (
                             <tr>
-                                <td colSpan={4} className="text-center">Loading...</td>
+                                <td colSpan={5} className="text-center">Loading...</td>
                             </tr>
                         ) : invoices.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="text-center">No Invoices Found</td>
+                                <td colSpan={5} className="text-center">No Invoices Found</td>
                             </tr>
                         ) :
                             <InvoiceRow

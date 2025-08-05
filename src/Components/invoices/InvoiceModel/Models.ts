@@ -12,6 +12,7 @@ export interface LineItem {
     rate: number;
     discount?: number; // Optional field for discount
     amount: number;
+    grossAmount: number;
     taxList: Tax[];
 }
 

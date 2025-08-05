@@ -23,6 +23,7 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
                             <th style={{ width: "120px" }}>Discount</th>
                             <th style={{ width: "220px" }}>Tax</th>
                             <th style={{ width: "120px" }}>Amount</th>
+                            <th style={{ width: "120px" }}>Gross Amount</th>
                             <th style={{ width: "50px" }}></th>
                         </tr>
                     </thead>
@@ -104,6 +105,14 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
                                         type="number"
                                         className="form-control"
                                         value={item.amount.toFixed(2)}
+                                        readOnly
+                                    />
+                                </td>
+                                <td>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        value={item.grossAmount.toFixed(2)}
                                         readOnly
                                     />
                                 </td>

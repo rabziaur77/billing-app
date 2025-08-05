@@ -10,7 +10,7 @@ interface Prop{
 const useItemLogic = ({ItemData, items}:Prop) => {
     const [TaxList, setTaxList] = useState<Tax[]>([]);
     const [lineItems, setLineItems] = useState<LineItem[]>([
-            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
+            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
         ]);
 
     useEffect(() => {
@@ -55,11 +55,16 @@ const useItemLogic = ({ItemData, items}:Prop) => {
                     ? numValue
                     : updatedItems[idx].quantity) *
                 (field === "rate" ? numValue : updatedItems[idx].rate);
+            updatedItems[idx].grossAmount = updatedItems[idx].amount;
+            if (updatedItems[idx].taxList.length > 0) {
+                updatedItems[idx].grossAmount += updatedItems[idx].taxList.reduce((acc, tax) => acc + (updatedItems[idx].amount * tax.rate / 100), 0);
+            }
         }else if (field === "discount") {
             const discountValue = Number(value);
             updatedItems[idx][field] = discountValue;
             updatedItems[idx].amount =
                 (updatedItems[idx].quantity * updatedItems[idx].rate) - discountValue;
+            updatedItems[idx].grossAmount = updatedItems[idx].amount;
         } 
         else if (field === "description") {
             updatedItems[idx][field] = value as string;
@@ -69,6 +74,13 @@ const useItemLogic = ({ItemData, items}:Prop) => {
             updatedItems[idx].taxList = TaxList.filter(tax =>
                 selectedIds.includes(tax.id)
             );
+            
+            if (updatedItems[idx].taxList.length > 0) {
+                updatedItems[idx].grossAmount += updatedItems[idx].taxList.reduce((acc, tax) => acc + (updatedItems[idx].amount * tax.rate / 100), 0);
+            }
+            else {
+                updatedItems[idx].grossAmount = updatedItems[idx].amount;
+            }
         }
         setLineItems(updatedItems);
         if (ItemData) {
@@ -88,7 +100,7 @@ const useItemLogic = ({ItemData, items}:Prop) => {
     const addLineItem = () => {
         setLineItems([
             ...lineItems,
-            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
+            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
         ]);
     };
 

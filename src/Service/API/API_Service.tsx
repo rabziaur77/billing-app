@@ -37,6 +37,7 @@ API_SERVICE.interceptors.request.use(
 
           config.headers.Authorization = `Bearer ${newTokenData.response.accessToken}`;
         } catch (err) {
+          console.error("Error refreshing token:", err);
           clearStoredToken();
           window.location.href = "/";
           return Promise.reject(err);
@@ -46,6 +47,18 @@ API_SERVICE.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+API_SERVICE.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    if (error.response && error.response.data === "Too Many Requests" && error.response.status === 429) {
+      await axios.get(`${API_BASE_URL}auth-api/Tax/GetTaxes741`);
+    }
     return Promise.reject(error);
   }
 );

@@ -14,6 +14,7 @@ interface InvoiceItemRequest {
     rate: number;
     discount?: number;
     amount: number;
+    grossAmount: number;
     taxList: number[];
 }
 
@@ -28,7 +29,7 @@ const useGenerateInvoiceLogic = () => {
     const [itemsCost, setItemsCost] = useState({ subTotal: Number(0), taxAmount: Number(0), total: Number(0) });
     const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
     const [itemData, setItemData] = useState<LineItem[]>([
-        { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
+        { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
     ]);
     const [InvoiceShow, setInvoiceShow] = useState<boolean>(false);
     const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
@@ -99,7 +100,7 @@ const useGenerateInvoiceLogic = () => {
             alert(response.data.status);
             setCustomer({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
             setItemData([
-                { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, taxList: [] },
+                { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
             ]);
             setItemsCost({ subTotal: 0, taxAmount: 0, total: 0 });
         } catch (error) {
@@ -124,6 +125,7 @@ const useGenerateInvoiceLogic = () => {
                 rate: item.rate,
                 discount: item.discount,
                 amount: item.amount,
+                grossAmount: item.grossAmount,
                 taxList: item.taxList.map(t => t.id)
             }))
         };
