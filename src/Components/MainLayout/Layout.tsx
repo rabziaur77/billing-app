@@ -5,6 +5,7 @@ import {
     FaFileInvoiceDollar,
     FaChevronLeft,
     FaChevronRight,
+    FaSignOutAlt,
 } from "react-icons/fa";
 import "./LayoutStyle.css";
 
@@ -37,6 +38,15 @@ const Layout: React.FC = () => {
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
     };
+    const handleLogout = () => {
+        clearStoredToken();
+        window.location.href = "/";
+    };
+
+    const clearStoredToken = () => {
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+    }
 
     return (
         <div className="layout-container">
@@ -65,7 +75,27 @@ const Layout: React.FC = () => {
                 {!collapsed && <div onMouseDown={handleResize} className="resizer" />}
             </aside>
             <div className="layout-main">
-                <header className="layout-header">Welcome, Admin</header>
+                <header className="layout-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span>Welcome, Admin</span>
+                    <button
+                        className="logout-btn"
+                        style={{
+                            background: "none",
+                            border: "none",
+                            color: "inherit",
+                            fontSize: "1rem",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem"
+                        }}
+                        onClick={handleLogout}
+                        title="Logout"
+                    >
+                        <FaSignOutAlt />
+                        <span style={{ display: "inline" }}>Logout</span>
+                    </button>
+                </header>
                 <main className="layout-content">
                     <Outlet />
                 </main>

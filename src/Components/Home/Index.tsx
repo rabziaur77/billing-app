@@ -23,14 +23,9 @@ const customerData = {
     ],
 };
 */
-const tableData = [
-    { id: 1, customer: 'John Doe', amount: 1200, date: '2025-01-10' },
-    { id: 2, customer: 'Jane Smith', amount: 1900, date: '2025-02-15' },
-    { id: 3, customer: 'Alice Brown', amount: 800, date: '2025-03-20' },
-];
 
 const Home: React.FC = () => {
-    const { monthlySales, monthlyRevenue } = useIndexLogic();
+    const { monthlySales, monthlyRevenue, tableData, recentState, setRecentState } = useIndexLogic();
     return (
         <>
         <div className='container'>
@@ -49,7 +44,16 @@ const Home: React.FC = () => {
             <div className='row'>
                 <div className='col'>
                     <h2>Recent Transactions</h2>
-                    <table border={1} cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+                    <div className='col-md-3 mb-3'>
+                        <select className='form-select' onChange={(e) => setRecentState(e.target.value)} value={recentState}>
+                            <option value="this week">This Week</option>
+                            <option value="last week">Last Week</option>
+                            <option value="this month">This Month</option>
+                            <option value="last month">Last Month</option>
+                            <option value="last 15 days">Last 15 Days</option>
+                        </select>
+                    </div>
+                    <table className='table table-striped'>
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -59,11 +63,11 @@ const Home: React.FC = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {tableData.map(row => (
-                                <tr key={row.id}>
-                                    <td>{row.id}</td>
-                                    <td>{row.customer}</td>
-                                    <td>{row.amount}</td>
+                            {tableData.map((row, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{row.customerName}</td>
+                                    <td>{row.totalAmount}</td>
                                     <td>{row.date}</td>
                                 </tr>
                             ))}
