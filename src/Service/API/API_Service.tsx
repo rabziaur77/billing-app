@@ -1,7 +1,7 @@
 import axios from "axios";
 import { clearStoredToken, getStoredToken, isTokenExpired, setStoredToken } from "./AuthService"
 
-const API_BASE_URL = "https://newbillingapigateway.onrender.com/";
+const API_BASE_URL = "https://billingapigateway.accurateappsolution.com/";
 //const API_BASE_URL = "http://localhost:5281/";
 
 export const API_SERVICE = axios.create({
