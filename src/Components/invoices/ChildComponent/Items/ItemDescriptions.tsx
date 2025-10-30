@@ -3,17 +3,17 @@ import Select from "react-select";
 import useItemLogic from "./ItemLogic";
 import type { LineItem } from "../../InvoiceModel/Models";
 
-interface Prop{
-    ItemData?: (item:any)=> void; 
+interface Prop {
+    ItemData?: (item: any) => void;
     items: LineItem[];
 }
 
-const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
-    const { addLineItem, handleLineItemChange, lineItems, removeLineItem, TaxList } = useItemLogic({ItemData, items});
+const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
+    const { addLineItem, handleLineItemChange, lineItems, removeLineItem, TaxList, ProductsList } = useItemLogic({ ItemData, items });
     return (
         <>
             <h5>Line Items</h5>
-            <div className="table-responsive mb-3">
+            <div className="mb-3">
                 <table className="table table-bordered align-middle">
                     <thead className="table-light">
                         <tr>
@@ -31,14 +31,16 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
                         {lineItems.map((item, idx) => (
                             <tr key={idx}>
                                 <td>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={item.description}
-                                        onChange={(e) =>
-                                            handleLineItemChange(idx, "description", e.target.value)
+                                    <Select
+                                        isSearchable={true}
+                                        options={ProductsList.map(product => ({
+                                            value: product.productId,
+                                            label: product.name
+                                        }))}
+                                        onChange={(selected) =>
+                                            handleLineItemChange(idx, "description", selected ? selected.value : "")
                                         }
-                                        required
+
                                     />
                                 </td>
                                 <td>
@@ -64,6 +66,7 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
                                             handleLineItemChange(idx, "rate", e.target.value)
                                         }
                                         required
+                                        disabled={true}
                                     />
                                 </td>
                                 <td>
@@ -76,6 +79,7 @@ const InvoiceDescription: React.FC<Prop> = ({ItemData, items}) => {
                                         onChange={(e) =>
                                             handleLineItemChange(idx, "discount", e.target.value)
                                         }
+                                        disabled={true}
                                     />
                                 </td>
                                 <td>
