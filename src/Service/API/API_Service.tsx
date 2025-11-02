@@ -11,7 +11,6 @@ export const API_SERVICE = axios.create({
 
 // ===== Refresh Token Handler =====
 let isRefreshing = false;
-let refreshPromise: Promise<any> | null = null;
 let requestQueue: ((token: string) => void)[] = [];
 
 const processQueue = (newToken: string | null) => {
@@ -40,7 +39,7 @@ API_SERVICE.interceptors.request.use(
     if (!isRefreshing) {
       isRefreshing = true;
 
-      refreshPromise = axios
+      axios
         .post(`${API_BASE_URL}auth-api/Account/refreshToken`, {
           AccessToken: accessToken || "",
           RefreshToken: "",
@@ -52,7 +51,13 @@ API_SERVICE.interceptors.request.use(
 
           isRefreshing = false;
           processQueue(newTokenData.response.accessToken);
-          return newTokenData.response.accessToken;
+          
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${newTokenData.response.accessToken}`,
+          };
+
+          return config;
         })
         .catch((err) => {
           isRefreshing = false;
