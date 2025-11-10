@@ -14,6 +14,9 @@ const menuItems = [
     // { icon: <FaUsers />, label: "Users", url: "/settings" },
     { icon: <FaFileInvoiceDollar />, label: "Invoices", url: "/invoices" },
     { icon: <FaFileInvoiceDollar />, label: "Invoice History", url: "/invoice-history" },
+    { icon: <FaFileInvoiceDollar />, label: "Category Master", url: "/category-management" },
+    { icon: <FaFileInvoiceDollar />, label: "Product Master", url: "/product-management" },
+    { icon: <FaFileInvoiceDollar />, label: "Product List", url: "/product-list" },
 ];
 
 const Layout: React.FC = () => {

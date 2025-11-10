@@ -88,6 +88,7 @@ const useItemLogic = ({ItemData, items}:Prop) => {
         else if (field === "description") {
             updatedItems[idx][field] = value as string;
             updatedItems[idx].rate = ProductsList.find(prod => prod.productId === value)?.price || 0;
+            updatedItems[idx].discount = ProductsList.find(prod => prod.productId === value)?.discount || 0;
 
             updateAmounts(updatedItems, idx, "field", updatedItems[idx].rate);
         }

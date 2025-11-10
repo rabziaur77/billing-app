@@ -1,12 +1,11 @@
-export interface Products {
+export interface ProductModel {
     productId: number;
-    tenantId: string;
     name: string;
     description: string;
     price: number;
     discount: number;
-    categoryId: number;
     sku: string;
+    categoryId: number;
     stockQuantity: number;
     isActive: boolean;
 }
