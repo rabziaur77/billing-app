@@ -6,7 +6,7 @@ const useProductLogics = () => {
     const [productModel, setProductModel] = useState<ProductModel>();
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [ProductList, setProductList] = useState<ProductModel[]>([]);
-    const [popupVisible, setPopupVisible] = useState<boolean>(false);
+    // const [popupVisible, setPopupVisible] = useState<boolean>(false);
     const [popupMessage, setPopupMessage] = useState<string>("");
 
     useEffect(() => {
@@ -15,14 +15,14 @@ const useProductLogics = () => {
         return () => {
         }
     }, []);
-    const popupMessageHandler = (response: any, successMessage: string, failedMessage: string) => {
-        setPopupVisible(true);
-        if (response.status === 200) {
-            setPopupMessage(successMessage);
-        } else {
-            setPopupMessage(response.data.message || failedMessage);
-        }
-    }
+    // const popupMessageHandler = (response: any, successMessage: string, failedMessage: string) => {
+    //     setPopupVisible(true);
+    //     if (response.status === 200) {
+    //         setPopupMessage(successMessage);
+    //     } else {
+    //         setPopupMessage(response.data.message || failedMessage);
+    //     }
+    // }
 
     const fetchProducts = async () => {
         const response = await API_SERVICE.get('/products-api/product/GetAllProducts');
@@ -47,19 +47,19 @@ const useProductLogics = () => {
         setPopupMessage("");
     }
 
-    const changeEvent=(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)=>{
-        const { name, value } = event.target;
+    // const changeEvent=(event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)=>{
+    //     const { name, value } = event.target;
         
-        if(name === "isActive"){
-            const boolValue = value === "true";
-            setProductModel(prev=>({...prev, [name]: boolValue} as ProductModel));
-        }
-        else{
-            setProductModel(prev=>({...prev, [name]: value} as ProductModel));
-        }
-        console.log(productModel);
+    //     if(name === "isActive"){
+    //         const boolValue = value === "true";
+    //         setProductModel(prev=>({...prev, [name]: boolValue} as ProductModel));
+    //     }
+    //     else{
+    //         setProductModel(prev=>({...prev, [name]: value} as ProductModel));
+    //     }
+    //     console.log(productModel);
 
-    }   
+    // }   
 
     const editProduct = (product: ProductModel) => {
         setProductModel(() => ({ ...product } as ProductModel));
@@ -67,6 +67,7 @@ const useProductLogics = () => {
     }
 
     const activateOrDeactivateProduct = async (product: ProductModel) => {
+        console.log("Activate or Deactivate Product:", product);
         // const updatedProduct = { ...product, isActive: !product.isActive };
         // const response = await API_SERVICE.put('/products-api/product/UpdateProduct', updatedProduct);
         // popupMessageHandler(response, `Product ${updatedProduct.isActive ? "activated" : "deactivated"} successfully.`, `Failed to ${updatedProduct.isActive ? "activate" : "deactivate"} product.`);
@@ -77,6 +78,7 @@ const useProductLogics = () => {
         productModel,
         ProductList,
         isEditing,
+        popupMessage,
         closePopup,
         editProduct,
         activateOrDeactivateProduct
