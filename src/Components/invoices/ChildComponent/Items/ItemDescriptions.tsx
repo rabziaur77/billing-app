@@ -2,6 +2,7 @@ import React from "react";
 import Select from "react-select";
 import useItemLogic from "./ItemLogic";
 import type { LineItem } from "../../InvoiceModel/Models";
+import './itemStyle.css'
 
 interface Prop {
     ItemData?: (item: any) => void;
@@ -9,7 +10,8 @@ interface Prop {
 }
 
 const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
-    const { addLineItem, handleLineItemChange, lineItems, removeLineItem, TaxList, ProductsList } = useItemLogic({ ItemData, items });
+    const { addLineItem, handleLineItemChange, lineItems, removeLineItem, 
+        TaxList, ProductsList, itemTaxesManage } = useItemLogic({ ItemData, items });
     return (
         <>
             <h5>Line Items</h5>
@@ -38,7 +40,7 @@ const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
                                             label: product.name
                                         }))}
                                         onChange={(selected) =>
-                                            handleLineItemChange(idx, "description", selected ? selected.value : "")
+                                            handleLineItemChange(idx, "productName", selected ? selected.value : "")
                                         }
 
                                     />
@@ -83,26 +85,17 @@ const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
                                     />
                                 </td>
                                 <td>
-                                    <Select
-                                        isMulti
-                                        options={TaxList.map(tax => ({
-                                            value: tax.id,
-                                            label: `${tax.name} (${tax.rate}%)`,
-                                        }))}
-                                        value={item.taxList.map(tax => ({
-                                            value: tax.id,
-                                            label: `${tax.name} (${tax.rate}%)`,
-                                        }))}
-                                        onChange={(selectedOptions) => {
-                                            const selectedNames = selectedOptions.map(option => option.value);
-                                            handleLineItemChange(idx, "taxList", selectedNames);
-                                        }}
-                                        menuPortalTarget={document.body}
-                                        styles={{
-                                            menuPortal: base => ({ ...base, zIndex: 9999 }),
-                                        }}
-                                    />
-
+                                    {item.taxList.length > 0 && (
+                                        <div className="box-select-multi">
+                                            {
+                                                item.taxList.map(tax => 
+                                                    <div className="item-tax" key={tax.id}>
+                                                        {`${tax.name} (${tax.rate}%)`}
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                    )}
                                 </td>
                                 <td>
                                     <input

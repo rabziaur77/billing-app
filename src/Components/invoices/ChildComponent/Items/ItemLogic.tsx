@@ -1,19 +1,20 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import type { LineItem, Tax } from '../../InvoiceModel/Models';
 import type { Products } from '../../InvoiceModel/Products';
 import { API_SERVICE } from '../../../../Service/API/API_Service';
+import type { ActionMeta, MultiValue } from 'react-select';
 
-interface Prop{
-    ItemData?: (Items: any)=> void; 
+interface Prop {
+    ItemData?: (Items: any) => void;
     items: LineItem[];
 }
 
-const useItemLogic = ({ItemData, items}:Prop) => {
+const useItemLogic = ({ ItemData, items }: Prop) => {
     const [TaxList, setTaxList] = useState<Tax[]>([]);
     const [ProductsList, setProductsList] = useState<Products[]>([]);
     const [lineItems, setLineItems] = useState<LineItem[]>([
-            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
-        ]);
+        { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
+    ]);
 
     useEffect(() => {
         if (items && items.length > 0) {
@@ -23,23 +24,25 @@ const useItemLogic = ({ItemData, items}:Prop) => {
 
     useEffect(() => {
         loadProducts();
-        loadTaxList();
     }, []);
 
     const loadProducts = async () => {
         try {
-            const response = await API_SERVICE.get('products-api/product/GetAllProducts');
+            const response = await API_SERVICE.get('products-api/product/GetAllInvoiceProducts');
             if (response.status === 200) {
                 const products = response.data.result.map((prod: any) => ({
                     productId: prod.productId,
                     tenantId: prod.tenantId,
                     name: prod.name,
                     description: prod.description,
-                    price: prod.price,
+                    purchasePrice: prod.purchasePrice,
+                    sellingPrice: prod.sellingPrice,
+                    discount: prod.discount,
                     categoryId: prod.categoryId,
                     sku: prod.sku,
                     stockQuantity: prod.stockQuantity,
-                    isActive: prod.isActive
+                    isActive: prod.isActive,
+                    taxes: prod.taxes
                 }));
 
                 setProductsList(products);
@@ -49,61 +52,30 @@ const useItemLogic = ({ItemData, items}:Prop) => {
         }
     };
 
-    const loadTaxList = async () => {
-        try {
-            const response = await API_SERVICE.get('invoice-api/Tax/GetTaxes');
-
-            if (response.status === 200) {
-                const taxList: Tax[] = response.data.map((tax: any) => ({
-                    id: tax.id,
-                    name: tax.name,
-                    rate: tax.rate
-                }));
-                
-                setTaxList(taxList);
-            }
-        } catch (error) {
-            console.error("Error loading tax list:", error);
-        }
-    };
-    
     const handleLineItemChange = (
         idx: number,
         field: keyof LineItem,
         value: string | number | string[] | number[]
     ) => {
         const updatedItems = [...lineItems];
-        if (field === "quantity" || field === "rate") {
-            const numValue = Number(value);
-            updatedItems[idx][field] = numValue;
-            updateAmounts(updatedItems, idx, field, numValue);
-            
-        }else if (field === "discount") {
-            const discountValue = Number(value);
-            updatedItems[idx][field] = discountValue;
-            updatedItems[idx].amount =
-                (updatedItems[idx].quantity * updatedItems[idx].rate) - discountValue;
-            updatedItems[idx].grossAmount = updatedItems[idx].amount;
-        } 
-        else if (field === "description") {
-            updatedItems[idx][field] = value as string;
-            updatedItems[idx].rate = ProductsList.find(prod => prod.productId === value)?.price || 0;
-            updatedItems[idx].discount = ProductsList.find(prod => prod.productId === value)?.discount || 0;
 
-            updateAmounts(updatedItems, idx, "field", updatedItems[idx].rate);
+        if (field === "quantity") {
+            updatedItems[idx].quantity = Number(value);
+            updateAmounts(updatedItems, idx);
         }
-        else if (field === "taxList") {
-            const selectedIds = value as number[];
-            updatedItems[idx].taxList = TaxList.filter(tax =>
-                selectedIds.includes(tax.id)
-            );
-            
-            if (updatedItems[idx].taxList.length > 0) {
-                updatedItems[idx].grossAmount += updatedItems[idx].taxList.reduce((acc, tax) => acc + (updatedItems[idx].amount * tax.rate / 100), 0);
-            }
-            else {
-                updatedItems[idx].grossAmount = updatedItems[idx].amount;
-            }
+        else {
+            const product = ProductsList.find(p => p.productId === value);
+            updatedItems[idx].productName = product?.name || "";
+            updatedItems[idx].productId = product?.productId || 0;
+            updatedItems[idx].rate = product?.sellingPrice || 0;
+            updatedItems[idx].discount = product?.discount || 0;
+            updatedItems[idx].taxList = product?.taxes?.map(tax => ({
+                id: tax.id,
+                name: tax.taxName,
+                rate: tax.taxRate
+            })) || [];
+
+            updateAmounts(updatedItems, idx);
         }
         setLineItems(updatedItems);
         if (ItemData) {
@@ -111,17 +83,41 @@ const useItemLogic = ({ItemData, items}:Prop) => {
         }
     };
 
-    const updateAmounts = (updatedItems: LineItem[], idx: number, field: string, numValue: number) => {
-        updatedItems[idx].amount =
-                (field === "quantity"
-                    ? numValue
-                    : updatedItems[idx].quantity) *
-                (field === "rate" ? numValue : updatedItems[idx].rate);
-            updatedItems[idx].grossAmount = updatedItems[idx].amount;
-            if (updatedItems[idx].taxList.length > 0) {
-                updatedItems[idx].grossAmount += updatedItems[idx].taxList.reduce((acc, tax) => acc + (updatedItems[idx].amount * tax.rate / 100), 0);
-            }
-    }
+    function itemTaxesManage(index: number, options: MultiValue<{ value: number; label: string; }>,
+        action: ActionMeta<{
+            value: number; label: string;
+        }>) {
+        const updatedItems = [...lineItems];
+
+        if (action.action === "remove-value") {
+            updatedItems[index].taxList = updatedItems[index].taxList.filter(tax => tax.id !== action.removedValue.value);
+        }
+        else if (action.action === "select-option" && action.option) {
+            updatedItems[index].taxList = [...updatedItems[index].taxList,
+            TaxList.find(tax => tax.id === action.option?.value)!];
+        }
+
+        setLineItems(updatedItems);
+        console.log("Number of index", index, "Options:", options, "Action:", action);
+    };
+
+    const updateAmounts = (items: LineItem[], idx: number) => {
+        const item = items[idx];
+
+        const baseAmount = item.quantity * item.rate;
+        const discountedAmount = baseAmount - (item.discount || 0);
+
+        item.amount = discountedAmount;
+
+        const taxAmount =
+            item.taxList?.reduce(
+                (acc, tax) => acc + (discountedAmount * tax.rate) / 100,
+                0
+            ) || 0;
+
+        item.grossAmount = discountedAmount + taxAmount;
+    };
+
 
     const removeLineItem = (idx: number) => {
         if (lineItems.length === 1) return;
@@ -135,7 +131,7 @@ const useItemLogic = ({ItemData, items}:Prop) => {
     const addLineItem = () => {
         setLineItems([
             ...lineItems,
-            { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
+            { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
         ]);
     };
 
@@ -145,7 +141,8 @@ const useItemLogic = ({ItemData, items}:Prop) => {
         removeLineItem,
         addLineItem,
         TaxList,
-        ProductsList
+        ProductsList,
+        itemTaxesManage
     };
 }
 

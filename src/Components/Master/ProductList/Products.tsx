@@ -5,7 +5,7 @@ import ProductManagement from "../ProductMaster/ProductManagement";
 
 
 const Products: React.FC = () => {
-    const {productModel ,isEditing, ProductList, editProduct, activateOrDeactivateProduct, closePopup} = useProductLogics();
+    const {productModel ,isEditing, ProductList, editProduct, closePopup} = useProductLogics();
     return (
         <div className="container py-4">
 
@@ -43,9 +43,9 @@ const Products: React.FC = () => {
                                         <button onClick={() => editProduct(product)} className="btn btn-sm btn-warning me-2">
                                             Edit
                                         </button>
-                                        <button onClick={() => activateOrDeactivateProduct(product)} className="btn btn-sm btn-danger">
+                                        {/* <button onClick={() => activateOrDeactivateProduct(product)} className="btn btn-sm btn-danger">
                                             {product.isActive ? "Deactivate" : "Activate"}
-                                        </button>
+                                        </button> */}
                                     </td>
                                 </tr>
                             ))}

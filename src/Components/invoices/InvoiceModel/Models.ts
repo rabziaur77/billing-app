@@ -7,7 +7,8 @@ export interface Tax {
 }
 
 export interface LineItem {
-    description: string;
+    productId: number;
+    productName: string;
     quantity: number;
     rate: number;
     discount?: number; // Optional field for discount

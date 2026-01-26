@@ -7,29 +7,33 @@ import { API_SERVICE } from "../../../Service/API/API_Service";
  * It handles the state for items cost, customer details, and item data.
  * It also provides methods to update these states and submit the form.
  */
-
-interface InvoiceItemRequest {
-    description: string;
-    quantity: number;
-    rate: number;
-    discount?: number;
-    amount: number;
-    grossAmount: number;
-    taxList: number[];
-}
-
-interface InvoiceRequest {
+export interface InvoiceRequest {
     invoiceNumber: string;
-    customerNameOrNumber: string;
+    createdBy: number;
+    customerName: string;
+    customerMobile?: string;
     invoiceItems: InvoiceItemRequest[];
 }
 
+export interface InvoiceItemRequest {
+    productId?: number;
+    productName: string;
+    quantity: number;
+    rate: number;
+    discount: number;
+    invoiceTaxes: InvoiceTaxRequest[];
+}
+
+export interface InvoiceTaxRequest {
+    taxCode: string;
+    taxPercent: number;
+}
 
 const useGenerateInvoiceLogic = () => {
     const [itemsCost, setItemsCost] = useState({ subTotal: Number(0), taxAmount: Number(0), total: Number(0) });
     const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
     const [itemData, setItemData] = useState<LineItem[]>([
-        { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
+        { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
     ]);
     const [InvoiceShow, setInvoiceShow] = useState<boolean>(false);
     const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
@@ -100,7 +104,7 @@ const useGenerateInvoiceLogic = () => {
             alert(response.data.status);
             setCustomer({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
             setItemData([
-                { description: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
+                { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
             ]);
             setItemsCost({ subTotal: 0, taxAmount: 0, total: 0 });
         } catch (error) {
@@ -118,16 +122,20 @@ const useGenerateInvoiceLogic = () => {
     ): InvoiceRequest {
         return {
             invoiceNumber: receipt.customer.InvoiceNumber,
-            customerNameOrNumber: receipt.customer.Name,
+            customerName: receipt.customer.Name,
+            createdBy: 0,
+            customerMobile: "",
             invoiceItems: receipt.invoiceList.map<InvoiceItemRequest>(item => ({
-                description: item.description,
+                productId: item.productId,
+                productName: item.productName,
                 quantity: item.quantity,
                 rate: item.rate,
-                discount: item.discount,
-                amount: item.amount,
-                grossAmount: item.grossAmount,
-                taxList: item.taxList.map(t => t.id)
-            }))
+                discount: item.discount || 0,
+                invoiceTaxes: item.taxList.map(t => ({
+                    taxCode: t.name,
+                    taxPercent: t.rate
+                }))
+            })),
         };
     }
 

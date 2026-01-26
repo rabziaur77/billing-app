@@ -33,16 +33,23 @@ const useProductLogics = () => {
                 name: prod.name,
                 description: prod.description,
                 discount: prod.discount,
-                price: prod.price,
+                price: prod.purchasePrice,
+                sellPrice: prod.sellingPrice,
                 categoryId: prod.categoryId,
                 stockQuantity: prod.stockQuantity,
                 isActive: prod.isActive,
+                taxes: prod.taxes.map((tax: any) => ({
+                    id: tax.taxId,
+                    name: tax.taxName,
+                    rate: tax.taxRate
+                }))
             }));
             setProductList(productData);
         }
     };
 
     const closePopup = ()=>{
+        fetchProducts();
         setIsEditing(false);
         setPopupMessage("");
     }
@@ -62,6 +69,7 @@ const useProductLogics = () => {
     // }   
 
     const editProduct = (product: ProductModel) => {
+        console.log("Edit Product:", product);
         setProductModel(() => ({ ...product } as ProductModel));
         setIsEditing(true);
     }
