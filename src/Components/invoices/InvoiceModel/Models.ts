@@ -31,3 +31,19 @@ export interface InvoiceReceipt {
     total: number;
     invoiceList: LineItem[];
 }
+
+export interface InvoiceModel {
+    id: number;
+    invoiceNumber: string;
+    customerName: string;
+    invoiceDate: string;
+}
+
+export interface InvoiceInfo {
+    invoiceID: number;
+    description: string;
+    quantity: number;
+    rate: number;
+    discount: number;
+    amount: number;
+}

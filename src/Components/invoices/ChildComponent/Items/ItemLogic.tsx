@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { LineItem, Tax } from '../../InvoiceModel/Models';
+import type { LineItem } from '../../InvoiceModel/Models';
 import type { Products } from '../../InvoiceModel/Products';
 import { API_SERVICE } from '../../../../Service/API/API_Service';
 import type { ActionMeta, MultiValue } from 'react-select';
@@ -10,7 +10,7 @@ interface Prop {
 }
 
 const useItemLogic = ({ ItemData, items }: Prop) => {
-    const [TaxList, setTaxList] = useState<Tax[]>([]);
+    // const [TaxList, setTaxList] = useState<Tax[]>([]);
     const [ProductsList, setProductsList] = useState<Products[]>([]);
     const [lineItems, setLineItems] = useState<LineItem[]>([
         { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
@@ -92,10 +92,10 @@ const useItemLogic = ({ ItemData, items }: Prop) => {
         if (action.action === "remove-value") {
             updatedItems[index].taxList = updatedItems[index].taxList.filter(tax => tax.id !== action.removedValue.value);
         }
-        else if (action.action === "select-option" && action.option) {
-            updatedItems[index].taxList = [...updatedItems[index].taxList,
-            TaxList.find(tax => tax.id === action.option?.value)!];
-        }
+        // else if (action.action === "select-option" && action.option) {
+        //     updatedItems[index].taxList = [...updatedItems[index].taxList,
+        //     TaxList.find(tax => tax.id === action.option?.value)!];
+        // }
 
         setLineItems(updatedItems);
         console.log("Number of index", index, "Options:", options, "Action:", action);
@@ -140,7 +140,7 @@ const useItemLogic = ({ ItemData, items }: Prop) => {
         handleLineItemChange,
         removeLineItem,
         addLineItem,
-        TaxList,
+        //TaxList,
         ProductsList,
         itemTaxesManage
     };

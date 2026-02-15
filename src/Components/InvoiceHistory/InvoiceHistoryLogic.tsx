@@ -1,26 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { API_SERVICE } from "../../Service/API/API_Service";
 import debounce from "lodash/debounce";
-import type { InvoiceReceipt } from "../invoices/InvoiceModel/Models";
-
-interface Invoice {
-    id: number;
-    invoiceNumber: string;
-    customerNameOrNumber: string;
-    createdDate: string;
-}
-
-interface InvoiceInfo {
-    invoiceID: number;
-    description: string;
-    quantity: number;
-    rate: number;
-    discount: number;
-    amount: number;
-}
+import type { InvoiceInfo, InvoiceModel, InvoiceReceipt } from "../invoices/InvoiceModel/Models";
 
 const useInvoiceHistoryLogic = () => {
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [invoices, setInvoices] = useState<InvoiceModel[]>([]);
     const [invoiceInfo, setInvoiceInfo] = useState<InvoiceInfo[]>([]);
     const [InvoiceSelected, setInvoiceSelected] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);

@@ -1,12 +1,8 @@
 import React from "react";
+import type { InvoiceModel } from "../invoices/InvoiceModel/Models";
 
 interface InvoiceRowProps {
-    invoices: Array<{
-        id: number;
-        invoiceNumber: string;
-        customerNameOrNumber: string;
-        createdDate: string;
-    }>;
+    invoices: InvoiceModel[];
     GetInvoiceHistory: (invoiceNumber: string) => void;
     InvoiceSelected: string | null;
     invoiceInfo: Array<{
@@ -32,8 +28,8 @@ const InvoiceRow = ({ invoices, GetInvoiceHistory, InvoiceSelected, invoiceInfo,
                             <td>{index + 1}</td>
                             <td onClick={() => GetInvoiceHistory(invoice.invoiceNumber)}
                                 style={{textDecoration: 'underline', color:'#4949ff'}}>{invoice.invoiceNumber}</td>
-                            <td>{invoice.customerNameOrNumber}</td>
-                            <td>{invoice.createdDate}</td>
+                            <td>{invoice.customerName}</td>
+                            <td>{invoice.invoiceDate}</td>
                             <td><button onClick={() => invoiceDetails(invoice.invoiceNumber)}>View Receipt</button></td>
                         </tr>
                         {InvoiceSelected === invoice.invoiceNumber && (

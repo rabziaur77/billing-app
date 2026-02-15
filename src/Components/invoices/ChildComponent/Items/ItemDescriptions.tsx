@@ -11,7 +11,8 @@ interface Prop {
 
 const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
     const { addLineItem, handleLineItemChange, lineItems, removeLineItem, 
-        TaxList, ProductsList, itemTaxesManage } = useItemLogic({ ItemData, items });
+        ProductsList } = useItemLogic({ ItemData, items });
+        //TaxList, ProductsList, itemTaxesManage } = useItemLogic({ ItemData, items });
     return (
         <>
             <h5>Line Items</h5>
@@ -103,6 +104,7 @@ const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
                                         className="form-control"
                                         value={item.amount.toFixed(2)}
                                         readOnly
+                                        disabled={true}
                                     />
                                 </td>
                                 <td>
@@ -111,6 +113,7 @@ const InvoiceDescription: React.FC<Prop> = ({ ItemData, items }) => {
                                         className="form-control"
                                         value={item.grossAmount.toFixed(2)}
                                         readOnly
+                                        disabled={true}
                                     />
                                 </td>
                                 <td>

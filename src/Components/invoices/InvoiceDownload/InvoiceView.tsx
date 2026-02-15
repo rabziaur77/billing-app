@@ -33,7 +33,7 @@ const InvoiceView = ({ invoiceData }: { invoiceData: InvoiceReceipt }) => {
             <tbody>
               {invoiceData.invoiceList.map((item: LineItem, index: number) => (
                 <tr key={index}>
-                  <td>{item.description}</td>
+                  <td>{item.productName}</td>
                   <td>{item.quantity}</td>
                   <td>{item.rate}</td>
                   <td>{item.discount?.toFixed(2) || 0}</td>
