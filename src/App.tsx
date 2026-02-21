@@ -22,7 +22,7 @@ const ProductList = AuthHOC(Products);
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename='/billing-app'>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LoginRedirect />} />
