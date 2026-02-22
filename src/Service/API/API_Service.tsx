@@ -1,7 +1,7 @@
 import axios from "axios";
 import { clearStoredToken, getStoredToken, isTokenExpired, setStoredToken } from "./AuthService";
 
-const API_BASE_URL = "https://calculated-plaintiff-thereafter-him.trycloudflare.com/";
+const API_BASE_URL = "https://irrigation-processing-lou-grand.trycloudflare.com/";
 
 export const API_SERVICE = axios.create({
   baseURL: API_BASE_URL,
