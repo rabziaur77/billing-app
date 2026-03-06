@@ -56,7 +56,7 @@ const useCategoryLogics = () => {
 
     const updateExistingCategory = async (category: Categories) => {
         const response = await API_SERVICE.put(`/products-api/product/UpdateCategory/${category.categoryId}`, {
-            IsActive: !category.isActive,
+            IsActive: category.isActive,
             Name: category.name,
             Description: category.description
         });
@@ -79,7 +79,9 @@ const useCategoryLogics = () => {
     const fetchCategories = async () => {
         const response = await API_SERVICE.get('/products-api/product/GetAllCategory');
         if (response.status === 200) {
-            const categoryData: Categories[] = response.data.result.map((cat: any) => ({
+            const categoryData: Categories[] = response.data.result
+            .sort((a: any, b: any) => a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1)
+            .map((cat: any) => ({
                 categoryId: cat.categoryId,
                 name: cat.name,
                 description: cat.description,

@@ -10,6 +10,7 @@ import InvoiceHistory from './Components/InvoiceHistory/InvoiceHistory';
 import CategoryManage from './Components/Master/CategoryMaster/CategoryManage';
 import ProductManagement from './Components/Master/ProductMaster/ProductManagement';
 import Products from './Components/Master/ProductList/Products';
+import TaxManage from './Components/Master/TaxMaster/TaxManage';
 
 const LoginRedirect = LoginRedirectAuth(Login);
 const AUthDashboard = AuthHOC(Home);
@@ -34,6 +35,7 @@ function App() {
             <Route path="/category-management" element={<Category />} />
             <Route path="/product-management" element={<Product />} />
             <Route path="/product-list" element={<ProductList />} />
+            <Route path="/tax-management" element={<TaxManage />} />
           </Route>
         </Routes>
       </AuthProvider>

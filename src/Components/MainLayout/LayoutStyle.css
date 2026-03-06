@@ -58,6 +58,14 @@
     text-decoration: none;
 }
 
+.menu-item.active {
+    background: #1b2530;
+    color: #4fc3f7;
+}
+
+.menu-item.active svg {
+    color: #4fc3f7;
+}
 .resizer {
     width: 6px;
     cursor: col-resize;
