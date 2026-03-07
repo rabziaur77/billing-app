@@ -28,7 +28,7 @@ const useProductLogic = (product: ProductModel) => {
     },[])    
 
     const fetchCategories = async () => {
-        const response = await API_SERVICE.get('/products-api/product/GetAllCategory');
+        const response = await API_SERVICE.get('/products-api/product/GetAllActiveCategory');
         if (response.status === 200) {
             const categoryData: Categories[] = response.data.result.map((cat: any) => ({
                 categoryId: cat.categoryId,
