@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { API_SERVICE } from "../../Service/API/API_Service";
 import debounce from "lodash/debounce";
 import type { InvoiceInfo, InvoiceModel, InvoiceReceipt } from "../invoices/InvoiceModel/Models";
@@ -10,6 +10,7 @@ const useInvoiceHistoryLogic = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [childLoading, setChildLoading] = useState<boolean>(false);
     const [isInvoiceShow, setIsInvoiceShow] = useState<boolean>(false);
+    const [receiptLoading, setReceiptLoading] = useState<boolean>(false);
     const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
         customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" },
         subtotal: 0,
@@ -26,7 +27,6 @@ const useInvoiceHistoryLogic = () => {
         setLoading(true);
         try {
             const response = await API_SERVICE.get('invoice-api/InvoiceHistory/GetListOfInvoices');
-            console.log("Fetched Invoices:", response.data.response);
             setInvoices(response.data.response);
             setLoading(false);
         } catch (error) {
@@ -35,23 +35,34 @@ const useInvoiceHistoryLogic = () => {
         }
     };
 
-    const GetInvoiceHistory = useCallback(debounce(async (invoiceNumber: string) => {
-        setChildLoading(true);
-        setInvoiceSelected(invoiceNumber);
-        setInvoiceInfo([]);
-        API_SERVICE.get(`invoice-api/InvoiceHistory/GetInvoiceInfo?invoiceNumber=${invoiceNumber}`)
-            .then(response => {
-                setInvoiceInfo(response.data.response);
-                setChildLoading(false);
-            })
-            .catch(error => {
-                console.error("Error fetching invoice history:", error);
-                setChildLoading(false);
-            });
-    }, 300), [])
+    const GetInvoiceHistory = useMemo(() =>
+        debounce(async (invoiceNumber: string) => {
+            setChildLoading(true);
+            setInvoiceSelected(invoiceNumber);
+            setInvoiceInfo([]);
+            API_SERVICE.get(`invoice-api/InvoiceHistory/GetInvoiceInfo?invoiceNumber=${invoiceNumber}`)
+                .then(response => {
+                    const mappedInfo = (response.data.response || []).map((item: any) => ({
+                        invoiceID: item.invoiceID,
+                        description: item.productName || item.description || "N/A",
+                        quantity: item.quantity,
+                        rate: item.rate,
+                        discount: item.discount,
+                        amount: item.lineTotal || item.grossAmount || item.amount || 0
+                    }));
+                    setInvoiceInfo(mappedInfo);
+                    setChildLoading(false);
+                })
+                .catch(error => {
+                    console.error("Error fetching invoice history:", error);
+                    setChildLoading(false);
+                });
+        }, 300),
+    []);
 
     const InvoiceDetails = useCallback((invoiceNumber:string) => {
         setIsInvoiceShow(true);
+        setReceiptLoading(true);
         API_SERVICE.get(`invoice-api/InvoiceHistory/GetInvoiceReceipt?invoiceNumber=${invoiceNumber}`)
             .then(response => {
 
@@ -64,9 +75,11 @@ const useInvoiceHistoryLogic = () => {
                 response.data.response.customer = cust;
 
                 setInvoiceReceipt(response.data.response);
+                setReceiptLoading(false);
             })
             .catch(error => {
                 console.error("Error fetching invoice details:", error);
+                setReceiptLoading(false);
             });
     }, []);
         
@@ -88,7 +101,8 @@ const useInvoiceHistoryLogic = () => {
         InvoiceDetails,
         invoiceReceipt,
         isInvoiceShow,
-        setIsInvoiceShow
+        setIsInvoiceShow,
+        receiptLoading
     };
 }
 

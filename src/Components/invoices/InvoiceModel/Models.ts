@@ -22,6 +22,7 @@ export interface CustomerInvoice {
     InvoiceDate: string;
     DueDate: string;
     InvoiceNumber: string;
+    CustomerMobile: string;
 }
 
 export interface InvoiceReceipt {

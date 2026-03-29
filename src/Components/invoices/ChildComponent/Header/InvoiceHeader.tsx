@@ -56,6 +56,17 @@ const InvoiceHeader: React.FC<Prop> = ({ SetCustomer, IsNewInvoice }) => {
                             readOnly
                         />
                     </div>
+                    <div className="col-md-4 mb-3">
+                        <label className="form-label">Customer Mobile</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            name="CustomerMobile"
+                            value={customer.CustomerMobile}
+                            onChange={handleInputChange}
+                            placeholder="Enter mobile number"
+                        />
+                    </div>
                 </div>
         </>
     );

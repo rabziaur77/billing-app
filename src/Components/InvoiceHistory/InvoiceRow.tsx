@@ -1,5 +1,6 @@
 import React from "react";
 import type { InvoiceModel } from "../invoices/InvoiceModel/Models";
+import BlurLoader from "../CommonComp/BlurLoader";
 
 interface InvoiceRowProps {
     invoices: InvoiceModel[];
@@ -27,54 +28,53 @@ const InvoiceRow = ({ invoices, GetInvoiceHistory, InvoiceSelected, invoiceInfo,
                         <tr className="pointer">
                             <td>{index + 1}</td>
                             <td onClick={() => GetInvoiceHistory(invoice.invoiceNumber)}
-                                style={{textDecoration: 'underline', color:'#4949ff'}}>{invoice.invoiceNumber}</td>
+                                style={{ textDecoration: 'underline', color: '#4949ff' }}>{invoice.invoiceNumber}</td>
                             <td>{invoice.customerName}</td>
                             <td>{invoice.invoiceDate}</td>
-                            <td><button onClick={() => invoiceDetails(invoice.invoiceNumber)}>View Receipt</button></td>
+                            <td><button onClick={() => invoiceDetails(invoice.invoiceNumber)} className="btn btn-sm btn-outline-primary">View Receipt</button></td>
                         </tr>
                         {InvoiceSelected === invoice.invoiceNumber && (
                             <tr>
                                 <td colSpan={5}>
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Invoice ID</th>
-                                                <th>Description</th>
-                                                <th>Quantity</th>
-                                                <th>Rate</th>
-                                                <th>Discount</th>
-                                                <th style={{ position: 'relative' }}>
-                                                    Amount
-                                                    <div className="amount-indicator">
-                                                        <button onClick={closeInfo} className="btn btn-danger">x</button>
-                                                    </div>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {
-                                                childLoading ? (
+                                    <div className="p-3 bg-light">
+                                        <BlurLoader isLoading={childLoading} minHeight="100px" loadingText="Loading Details...">
+                                            <table className="table table-sm table-bordered bg-white mb-0">
+                                                <thead className="table-dark">
                                                     <tr>
-                                                        <td colSpan={6} className="text-center">Loading...</td>
+                                                        <th>Invoice ID</th>
+                                                        <th>Description</th>
+                                                        <th>Quantity</th>
+                                                        <th>Rate</th>
+                                                        <th>Discount</th>
+                                                        <th style={{ position: 'relative' }}>
+                                                            Amount
+                                                            <div style={{ position: 'absolute', right: '0', top: '0' }}>
+                                                                <button onClick={closeInfo} className="btn btn-sm btn-danger">x</button>
+                                                            </div>
+                                                        </th>
                                                     </tr>
-                                                ) : invoices.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan={6} className="text-center">No Invoices Found</td>
-                                                    </tr>
-                                                ) :
-                                                    invoiceInfo.map((info, index) => (
-                                                        <tr key={index}>
-                                                            <td>{info.invoiceID}</td>
-                                                            <td>{info.description}</td>
-                                                            <td>{info.quantity}</td>
-                                                            <td>{info.rate}</td>
-                                                            <td>{info.discount}</td>
-                                                            <td>{info.amount}</td>
+                                                </thead>
+                                                <tbody>
+                                                    {invoiceInfo.length === 0 && !childLoading ? (
+                                                        <tr>
+                                                            <td colSpan={6} className="text-center">No Details Found</td>
                                                         </tr>
-                                                    ))
-                                            }
-                                        </tbody>
-                                    </table>
+                                                    ) : (
+                                                        invoiceInfo.map((info, index) => (
+                                                            <tr key={index}>
+                                                                <td>{info.invoiceID}</td>
+                                                                <td>{info.description}</td>
+                                                                <td>{info.quantity}</td>
+                                                                <td>{info.rate}</td>
+                                                                <td>{info.discount}</td>
+                                                                <td>{info.amount}</td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </BlurLoader>
+                                    </div>
                                 </td>
                             </tr>
                         )}

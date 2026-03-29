@@ -3,19 +3,43 @@ import useProductLogic from "./ProductManagementLogic";
 import Select from "react-select";
 import PopupView from "../../CommonComp/PopupView";
 import MessageView from "../../CommonComp/MessageVIew";
+import CsvUpload from "../../CommonComp/CsvUpload";
+import type { ProductModel } from "../MasterModels/ProductModel";
 
 interface ProductManagementProps {
-    product?: any;
+    product?: ProductModel;
 }
 
 const ProductManagement: React.FC<ProductManagementProps> = ({ product }) => {
 
     const {submitProductForm, changeEvent, productModel, categoryList, TaxList, isMessageShow, popupMessage,
-        selectedTax, selectedTaxList, buttonName, closePopup} = useProductLogic(product);
+        selectedTax, selectedTaxList, buttonName, closePopup, onBulkUploadProducts, 
+        isBulkLoading, uploadProgress} = useProductLogic(product);
+
+    const [showCsvUpload, setShowCsvUpload] = React.useState(false);
 
     return (
         <div className="container py-4">
-            <h2 className="mb-4">Product Management</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="mb-0">Product Management</h2>
+                <button 
+                    className={`btn ${showCsvUpload ? 'btn-secondary' : 'btn-outline-primary'}`}
+                    onClick={() => setShowCsvUpload(!showCsvUpload)}
+                >
+                    <i className={`bi ${showCsvUpload ? 'bi-x-circle' : 'bi-upload'} me-1`}></i>
+                    {showCsvUpload ? 'Close Bulk Upload' : 'Bulk Upload via CSV'}
+                </button>
+            </div>
+
+            {showCsvUpload && (
+                <CsvUpload 
+                    onUpload={onBulkUploadProducts} 
+                    columns={["sku", "name", "price", "sellPrice", "categoryId", "description", "discount", "stockQuantity", "lowStockThreshold", "isActive", "taxes"]}
+                    fileName="products_template.csv"
+                    isLoading={isBulkLoading}
+                    progress={uploadProgress}
+                />
+            )}
 
             <div className="card mb-4">
                 <div className="card-body">
@@ -135,6 +159,18 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ product }) => {
                                     onChange={changeEvent}
                                     className="form-control"
                                     placeholder="Enter stock quantity"
+                                />
+                            </div>
+                            <div className="col-md-4">
+                                <label htmlFor="lowStockThreshold" className="form-label">Low Stock Threshold</label>
+                                <input
+                                    type="text"
+                                    id="lowStockThreshold"
+                                    name="lowStockThreshold"
+                                    value={productModel?.lowStockThreshold || ''}
+                                    onChange={changeEvent}
+                                    className="form-control"
+                                    placeholder="Enter low stock threshold"
                                 />
                             </div>
                             <div className="col-md-4">

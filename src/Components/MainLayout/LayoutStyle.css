@@ -41,7 +41,38 @@
 
 .sidebar-nav {
     flex: 1;
-    padding-top: 16px;
+    padding-top: 8px;
+}
+
+.sidebar-group-header {
+    padding: 16px 16px 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #8b96a2;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.sidebar-group-header:hover {
+    color: #fff;
+}
+
+.sidebar.collapsed .sidebar-group-header {
+    display: none;
+}
+
+.group-chevron {
+    font-size: 10px;
+    transition: transform 0.2s;
+}
+
+.group-chevron.expanded {
+    transform: rotate(90deg);
 }
 
 .menu-item {

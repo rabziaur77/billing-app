@@ -10,6 +10,7 @@ export interface ProductModel {
     sku: string;
     categoryId: number;
     stockQuantity: number;
+    lowStockThreshold: number;
     isActive: boolean;
     taxes: Tax[];
 }

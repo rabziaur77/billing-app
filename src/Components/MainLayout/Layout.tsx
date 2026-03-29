@@ -1,34 +1,30 @@
 import React, { useState } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import {
-    FaTachometerAlt,
-    FaFileInvoiceDollar,
-    FaHistory,
-    FaTags,
-    FaBoxOpen,
-    FaListUl,
-    FaPercentage,
     FaChevronLeft,
     FaChevronRight,
     FaSignOutAlt,
 } from "react-icons/fa";
+import { useAuth } from "../../Service/ContextService/AuthContext";
+import { IconMapper } from "./IconMapper";
 import "./LayoutStyle.css";
-
-// icons are chosen to better represent each page
-const menuItems = [
-    { icon: <FaTachometerAlt />, label: "Dashboard", url: "/dashboard" },
-    { icon: <FaFileInvoiceDollar />, label: "Invoices", url: "/invoices" },
-    { icon: <FaHistory />, label: "Invoice History", url: "/invoice-history" },
-    { icon: <FaTags />, label: "Category Master", url: "/category-management" },
-    { icon: <FaBoxOpen />, label: "Product Master", url: "/product-management" },
-    { icon: <FaListUl />, label: "Product List", url: "/product-list" },
-    { icon: <FaPercentage />, label: "Tax Management", url: "/tax-management" },
-];
 
 const Layout: React.FC = () => {
     const location = useLocation();
+    const { menuItems, isLoadingMenu } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(220);
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+        "General": true,
+    });
+
+    const toggleGroup = (category: string) => {
+        setExpandedGroups(prev => ({
+            ...prev,
+            [category]: !prev[category]
+        }));
+    };
+
     const minWidth = 60;
     const maxWidth = 300;
     const handleResize = (e: React.MouseEvent) => {
@@ -48,9 +44,10 @@ const Layout: React.FC = () => {
         window.addEventListener("mousemove", onMouseMove);
         window.addEventListener("mouseup", onMouseUp);
     };
+
     const handleLogout = () => {
         clearStoredToken();
-        window.location.href = "/";
+        window.location.href = "/billing-app/";
     };
 
     const clearStoredToken = () => {
@@ -82,16 +79,47 @@ const Layout: React.FC = () => {
                     </button>
                 </div>
                 <nav className="sidebar-nav">
-                    {menuItems.map((item) => (
-                        <Link
-                            to={item.url || '#'}
-                            className={"menu-item" + (isActive(item.url) ? " active" : "")}
-                            key={item.label}
-                        >
-                            {item.icon}
-                            {!collapsed && item.label}
-                        </Link>
-                    ))}
+                    {isLoadingMenu ? (
+                        <div style={{ padding: '1rem', color: '#fff', textAlign: 'center' }}>Loading...</div>
+                    ) : (
+                        Object.entries(
+                            menuItems.reduce((acc: any, item) => {
+                                const label = (item.label || "").toLowerCase();
+                                let cat = "General";
+                                if (label.includes("management") || label.includes("master") || label.includes("user") || label.includes("role") || label.includes("permission") || label.includes("product") || label.includes("category") || label.includes("tax")) {
+                                    cat = "Master Data";
+                                } else if (label.includes("invoice") || label.includes("history")) {
+                                    cat = "Transactions";
+                                }
+                                if (!acc[cat]) acc[cat] = [];
+                                acc[cat].push(item);
+                                return acc;
+                            }, {})
+                        ).map(([category, items]: [string, any]) => (
+                            <React.Fragment key={category}>
+                                <div
+                                    className="sidebar-group-header"
+                                    onClick={() => toggleGroup(category)}
+                                >
+                                    <span>{category}</span>
+                                    <FaChevronRight className={`group-chevron ${expandedGroups[category] === true ? 'expanded' : ''}`} />
+                                </div>
+                                {expandedGroups[category] === true && items.map((item: any) => (
+                                    <Link
+                                        to={item.url || '#'}
+                                        className={"menu-item" + (isActive(item.url) ? " active" : "")}
+                                        key={item.label}
+                                        title={collapsed ? item.label : ""}
+                                    >
+                                        <span className="menu-icon">
+                                            {IconMapper(item.iconName)}
+                                        </span>
+                                        {!collapsed && <span className="menu-label">{item.label}</span>}
+                                    </Link>
+                                ))}
+                            </React.Fragment>
+                        ))
+                    )}
                 </nav>
                 {!collapsed && <div onMouseDown={handleResize} className="resizer" />}
             </aside>
@@ -100,7 +128,7 @@ const Layout: React.FC = () => {
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         {currentItem ? (
                             <>
-                                {currentItem.icon}
+                                {IconMapper(currentItem.iconName)}
                                 <span>{currentItem.label}</span>
                             </>
                         ) : (

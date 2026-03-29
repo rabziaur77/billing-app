@@ -5,7 +5,7 @@ import type { LineItem } from "../../InvoiceModel/Models";
 import './itemStyle.css'
 
 interface Prop {
-    ItemData?: (item: any) => void;
+    ItemData?: (item: LineItem[]) => void;
     items: LineItem[];
 }
 

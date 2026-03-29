@@ -5,8 +5,23 @@ import { API_SERVICE } from '../../../../Service/API/API_Service';
 import type { ActionMeta, MultiValue } from 'react-select';
 
 interface Prop {
-    ItemData?: (Items: any) => void;
+    ItemData?: (Items: LineItem[]) => void;
     items: LineItem[];
+}
+
+interface ApiProductResp {
+    productId: number;
+    tenantId: number;
+    name: string;
+    description: string;
+    purchasePrice: number;
+    sellingPrice: number;
+    discount: number;
+    categoryId: number;
+    sku: string;
+    stockQuantity: number;
+    isActive: boolean;
+    taxes: { id: number, taxName: string, taxRate: number }[];
 }
 
 const useItemLogic = ({ ItemData, items }: Prop) => {
@@ -30,7 +45,7 @@ const useItemLogic = ({ ItemData, items }: Prop) => {
         try {
             const response = await API_SERVICE.get('products-api/product/GetAllInvoiceProducts');
             if (response.status === 200) {
-                const products = response.data.result.map((prod: any) => ({
+                const products = response.data.result.map((prod: ApiProductResp) => ({
                     productId: prod.productId,
                     tenantId: prod.tenantId,
                     name: prod.name,

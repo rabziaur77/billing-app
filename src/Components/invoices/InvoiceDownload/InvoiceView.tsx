@@ -52,9 +52,24 @@ const InvoiceView = ({ invoiceData }: { invoiceData: InvoiceReceipt }) => {
         </div>
       </div>
 
-      <div className="container no-print">
-        <button className="btn btn-success mt-3" onClick={handlePrint}>
-          Print Invoice
+      <div className="container no-print d-flex gap-2">
+        <button className="btn btn-primary mt-3" onClick={handlePrint}>
+          <i className="bi bi-printer me-1"></i> Print Invoice
+        </button>
+        <button className="btn btn-success mt-3" onClick={() => {
+          const customer = invoiceData.customer;
+          const message = `*Invoice: ${customer.InvoiceNumber}*\n` +
+            `Hello ${customer.Name},\n\n` +
+            `Your invoice for *₹${invoiceData.total.toFixed(2)}* is ready.\n` +
+            `Date: ${customer.InvoiceDate}\n` +
+            `Due Date: ${customer.DueDate}\n\n` +
+            `Thank you for your business!`;
+          
+          const encodedMessage = encodeURIComponent(message);
+          const whatsappUrl = `https://wa.me/${customer.CustomerMobile}?text=${encodedMessage}`;
+          window.open(whatsappUrl, '_blank');
+        }}>
+          <i className="bi bi-whatsapp me-1"></i> Send to WhatsApp
         </button>
       </div>
     </>

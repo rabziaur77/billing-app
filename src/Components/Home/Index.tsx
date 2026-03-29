@@ -1,47 +1,43 @@
 import React from 'react';
-//import { Link } from 'react-router-dom';
-import { Bar, Line } from 'react-chartjs-2';//Doughnut
+import { Bar, Line } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import useIndexLogic from './IndexLogic';
+import BlurLoader from '../CommonComp/BlurLoader';
+import './Home.css';
 
 // Register Chart.js components
 Chart.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend);
 
-/*
-const customerData = {
-    labels: ['Returning', 'New', 'Guest'],
-    datasets: [
-        {
-            label: 'Customer Types',
-            data: [60, 30, 10],
-            backgroundColor: [
-                'rgba(54, 162, 235, 0.6)',
-                'rgba(255, 206, 86, 0.6)',
-                'rgba(255, 99, 132, 0.6)',
-            ],
-        },
-    ],
-};
-*/
-
 const Home: React.FC = () => {
-    const { monthlySales, monthlyRevenue, tableData, recentState, setRecentState } = useIndexLogic();
+    const { 
+        monthlySales, 
+        monthlyRevenue, 
+        tableData, 
+        recentState, 
+        setRecentState, 
+        isSalesLoading, 
+        isRevenueLoading, 
+        isTableLoading 
+    } = useIndexLogic();
+
     return (
-        <>
-        <div className='container'>
+        <div className="dashboard-container">
             <div className='row'>
                 <div className='col-md-6'>
                     <h2>Sales Overview</h2>
-                    <Bar data={monthlySales} />
+                    <BlurLoader isLoading={isSalesLoading} minHeight="300px" loadingText="Fetching Sales...">
+                        <Bar data={monthlySales} />
+                    </BlurLoader>
                 </div>
                 <div className='col-md-6'>
                     <h2>Revenue Overview</h2>
-                    <Line data={monthlyRevenue} />
+                    <BlurLoader isLoading={isRevenueLoading} minHeight="300px" loadingText="Fetching Revenue...">
+                        <Line data={monthlyRevenue} />
+                    </BlurLoader>
                 </div>
             </div>
-        </div>
-        <div className='container mt-5'>
-            <div className='row'>
+
+            <div className='row mt-5'>
                 <div className='col'>
                     <h2>Recent Transactions</h2>
                     <div className='col-md-3 mb-3'>
@@ -53,34 +49,34 @@ const Home: React.FC = () => {
                             <option value="last 15 days">Last 15 Days</option>
                         </select>
                     </div>
-                    <table className='table table-striped'>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Customer</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tableData.map((row, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>{row.customerName}</td>
-                                    <td>{row.totalAmount}</td>
-                                    <td>{row.date}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    
+                    <div className="table-responsive">
+                        <BlurLoader isLoading={isTableLoading} minHeight="200px" loadingText="Fetching Transactions...">
+                            <table className='table table-striped'>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tableData.map((row, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{row.customerName}</td>
+                                            <td>{row.totalAmount}</td>
+                                            <td>{row.date}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </BlurLoader>
+                    </div>
                 </div>
-                {/* <div className='col-md-3'>
-                    <h2>Customer Types</h2>
-                    <Doughnut data={customerData} />
-                </div> */}
             </div>
         </div>
-        </>
     );
 };
 

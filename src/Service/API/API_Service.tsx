@@ -1,7 +1,7 @@
 import axios from "axios";
 import { clearStoredToken, getStoredToken, isTokenExpired, setStoredToken } from "./AuthService";
 
-const API_BASE_URL = "https://89-116-21-168.sslip.io/";//"http://localhost:5180/";
+const API_BASE_URL = "http://localhost:5180/"; // "https://89-116-21-168.sslip.io/";
 
 export const API_SERVICE = axios.create({
   baseURL: API_BASE_URL,
@@ -11,10 +11,16 @@ export const API_SERVICE = axios.create({
 
 // ===== Refresh Token Handler =====
 let isRefreshing = false;
-let requestQueue: ((token: string) => void)[] = [];
+let requestQueue: { resolve: (token: string) => void; reject: (error: any) => void }[] = [];
 
-const processQueue = (newToken: string | null) => {
-  requestQueue.forEach((cb) => cb(newToken || ""));
+const processQueue = (error: any, newToken: string | null = null) => {
+  requestQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(newToken || "");
+    }
+  });
   requestQueue = [];
 };
 
@@ -23,6 +29,7 @@ API_SERVICE.interceptors.request.use(
   async (config: any) => {
     const tokenData = getStoredToken();
     const accessToken = tokenData?.response?.accessToken;
+    const refreshToken = tokenData?.response?.refreshToken;
 
     if (!tokenData) return config;
 
@@ -39,45 +46,52 @@ API_SERVICE.interceptors.request.use(
     if (!isRefreshing) {
       isRefreshing = true;
 
-      axios
-        .post(`${API_BASE_URL}auth-api/Account/refreshToken`, {
-          AccessToken: accessToken || "",
-          RefreshToken: "",
-        }, { withCredentials: true })
-        .then((res) => {
-          const newTokenData = res.data;
-          clearStoredToken();
-          setStoredToken(newTokenData);
+      try {
+        const res = await axios.post(
+          `${API_BASE_URL}auth-api/Account/refreshToken`,
+          {
+            AccessToken: accessToken || "",
+            RefreshToken: refreshToken || "",
+          },
+          { withCredentials: true }
+        );
 
-          isRefreshing = false;
-          processQueue(newTokenData.response.accessToken);
-          
-          config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${newTokenData.response.accessToken}`,
-          };
+        const newTokenData = res.data;
+        clearStoredToken();
+        setStoredToken(newTokenData);
 
-          return config;
-        })
-        .catch((err) => {
-          isRefreshing = false;
-          processQueue(null);
-          clearStoredToken();
-          window.location.href = "/";
-          throw err;
-        });
+        isRefreshing = false;
+        processQueue(null, newTokenData.response.accessToken);
+
+        config.headers = {
+          ...config.headers,
+          Authorization: `Bearer ${newTokenData.response.accessToken}`,
+        };
+        return config;
+      } catch (err) {
+        isRefreshing = false;
+        processQueue(err, null);
+        clearStoredToken();
+        window.location.href = "/";
+        return Promise.reject(err);
+      }
     }
 
     // ⏳ Queue requests until refresh done
-    return new Promise((resolve) => {
-      requestQueue.push((newToken) => {
-        if (newToken) {
-          config.headers = {
-            ...config.headers,
-            Authorization: `Bearer ${newToken}`,
-          };
-        }
-        resolve(config);
+    return new Promise((resolve, reject) => {
+      requestQueue.push({
+        resolve: (newToken: string) => {
+          if (newToken) {
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${newToken}`,
+            };
+          }
+          resolve(config);
+        },
+        reject: (err: any) => {
+          reject(err);
+        },
       });
     });
   },

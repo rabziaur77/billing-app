@@ -1,18 +1,41 @@
 import React from "react";
-import TaxLogics from "./TaxLogics";
 import MessageView from "../../CommonComp/MessageVIew";
 import PopupView from "../../CommonComp/PopupView";
+import BlurLoader from "../../CommonComp/BlurLoader";
+import CsvUpload from "../../CommonComp/CsvUpload";
+import useTaxLogics from "./TaxLogics";
 
 
 const TaxManage: React.FC = () => {
-    const { taxes, editTax,
-        popupVisible, popupMessage, closePopup, taxModel,
-        submitTaxForm, changeEvent, cancelEdit, isEditing } = TaxLogics();
+    const { taxes, editTax, popupVisible, popupMessage, closePopup, taxModel, 
+            submitTaxForm, cancelEdit, isEditing, changeEvent, isLoading, 
+            onBulkUploadTaxes, isBulkLoading, uploadProgress } = useTaxLogics();
+
+    const [showCsvUpload, setShowCsvUpload] = React.useState(false);
 
     return (
         <div className="container py-4">
 
-            <h2 className="mb-4">Tax Management</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="mb-0">Tax Management</h2>
+                <button 
+                    className={`btn ${showCsvUpload ? 'btn-secondary' : 'btn-outline-primary'}`}
+                    onClick={() => setShowCsvUpload(!showCsvUpload)}
+                >
+                    <i className={`bi ${showCsvUpload ? 'bi-x-circle' : 'bi-upload'} me-1`}></i>
+                    {showCsvUpload ? 'Close Bulk Upload' : 'Bulk Upload via CSV'}
+                </button>
+            </div>
+
+            {showCsvUpload && (
+                <CsvUpload 
+                    onUpload={onBulkUploadTaxes} 
+                    columns={["name", "rate"]}
+                    fileName="taxes_template.csv"
+                    isLoading={isBulkLoading}
+                    progress={uploadProgress}
+                />
+            )}
 
             {/* Form Section */}
             <div className="card mb-4">
@@ -64,31 +87,33 @@ const TaxManage: React.FC = () => {
 
             {/* Table Section */}
             <div className="card">
-                <div className="card-body">
-                    <table className="table table-bordered table-hover align-middle">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Tax ID</th>
-                                <th>Name</th>
-                                <th>Rate (%)</th>
-                                <th className="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {taxes.map((tax) => (
-                                <tr key={tax.id}>
-                                    <td>{tax.id}</td>
-                                    <td>{tax.name}</td>
-                                    <td>{tax.rate}</td>
-                                    <td className="text-center">
-                                        <button onClick={() => editTax(tax)} className="btn btn-sm btn-warning me-2">
-                                            Edit
-                                        </button>
-                                    </td>
+                <div className="card-body p-0">
+                    <BlurLoader isLoading={isLoading} minHeight="200px" loadingText="Loading Taxes...">
+                        <table className="table table-bordered table-hover align-middle mb-0">
+                            <thead className="table-light">
+                                <tr>
+                                    <th>Tax ID</th>
+                                    <th>Name</th>
+                                    <th>Rate (%)</th>
+                                    <th className="text-center">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {taxes.map((tax) => (
+                                    <tr key={tax.id}>
+                                        <td>{tax.id}</td>
+                                        <td>{tax.name}</td>
+                                        <td>{tax.rate}</td>
+                                        <td className="text-center">
+                                            <button onClick={() => editTax(tax)} className="btn btn-sm btn-warning me-2">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </BlurLoader>
                 </div>
             </div>
             {

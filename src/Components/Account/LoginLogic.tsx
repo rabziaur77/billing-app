@@ -21,7 +21,7 @@ const useLoginLogic = () => {
             return;
         }
 
-        let currentPage = window.location.hostname.split(".")[0];
+        const currentPage = window.location.hostname.split(".")[0];
 
         const body = {
             email: loginModel.email,
@@ -39,11 +39,12 @@ const useLoginLogic = () => {
             } else {
                 setError('Login failed. Please check your credentials.');
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             setIsLoading(false);
+            const errorObj = err as { response?: { data?: { status?: string } }, message?: string };
             setError(
-                err?.response?.data?.status ||
-                err?.message ||
+                errorObj?.response?.data?.status ||
+                errorObj?.message ||
                 'An unexpected error occurred. Please try again.'
             );
         }

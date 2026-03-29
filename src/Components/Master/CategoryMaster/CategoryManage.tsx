@@ -1,18 +1,41 @@
-import React from "react";
-import CategoryLogics from "./CategoryLogics";
+import React, { useState } from "react";
+import useCategoryLogics from "./CategoryLogics";
 import MessageView from "../../CommonComp/MessageVIew";
 import PopupView from "../../CommonComp/PopupView";
+import CsvUpload from "../../CommonComp/CsvUpload";
+import BlurLoader from "../../CommonComp/BlurLoader";
 
 
 const CategoryManage: React.FC = () => {
-    const { categories, editCategory, activateOrDeactivateCategory,
-        popupVisible, popupMessage, closePopup, categoryModel,
-        submitCategoryForm, changeEvent, cancelEdit, isEditing } = CategoryLogics();
+    const { categories, editCategory, activateOrDeactivateCategory, popupVisible, popupMessage, 
+            closePopup, categoryModel, submitCategoryForm, changeEvent, cancelEdit, isEditing, 
+            isLoading, onBulkUploadCategories, isBulkLoading, uploadProgress } = useCategoryLogics();
+
+    const [showCsvUpload, setShowCsvUpload] = useState(false);
 
     return (
         <div className="container py-4">
 
-            <h2 className="mb-4">Category Management</h2>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h2 className="mb-0">Categories</h2>
+                <button 
+                    className={`btn ${showCsvUpload ? 'btn-secondary' : 'btn-outline-primary'}`}
+                    onClick={() => setShowCsvUpload(!showCsvUpload)}
+                >
+                    <i className={`bi ${showCsvUpload ? 'bi-x-circle' : 'bi-upload'} me-1`}></i>
+                    {showCsvUpload ? 'Close Bulk Upload' : 'Bulk Upload via CSV'}
+                </button>
+            </div>
+
+            {showCsvUpload && (
+                <CsvUpload 
+                    onUpload={onBulkUploadCategories} 
+                    columns={["name", "description", "isActive"]}
+                    fileName="categories_template.csv"
+                    isLoading={isBulkLoading}
+                    progress={uploadProgress}
+                />
+            )}
 
             {/* Form Section */}
             <div className="card mb-4">
@@ -72,36 +95,38 @@ const CategoryManage: React.FC = () => {
 
             {/* Table Section */}
             <div className="card">
-                <div className="card-body">
-                    <table className="table table-bordered table-hover align-middle">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Category ID</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Is Active</th>
-                                <th className="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {categories.map((category) => (
-                                <tr key={category.categoryId}>
-                                    <td>{category.categoryId}</td>
-                                    <td>{category.name}</td>
-                                    <td>{category.description}</td>
-                                    <td>{category.isActive ? "Yes" : "No"}</td>
-                                    <td className="text-center">
-                                        <button onClick={() => editCategory(category)} className="btn btn-sm btn-warning me-2">
-                                            Edit
-                                        </button>
-                                        <button onClick={() => activateOrDeactivateCategory(category)} className="btn btn-sm btn-danger">
-                                            {category.isActive ? "Deactivate" : "Activate"}
-                                        </button>
-                                    </td>
+                <div className="card-body p-0">
+                    <BlurLoader isLoading={isLoading} minHeight="200px" loadingText="Loading Categories...">
+                        <table className="table table-bordered table-hover align-middle mb-0">
+                            <thead className="table-light">
+                                <tr>
+                                    <th>Category ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Is Active</th>
+                                    <th className="text-center">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {categories.map((category) => (
+                                    <tr key={category.categoryId}>
+                                        <td>{category.categoryId}</td>
+                                        <td>{category.name}</td>
+                                        <td>{category.description}</td>
+                                        <td>{category.isActive ? "Yes" : "No"}</td>
+                                        <td className="text-center">
+                                            <button onClick={() => editCategory(category)} className="btn btn-sm btn-warning me-2">
+                                                Edit
+                                            </button>
+                                            <button onClick={() => activateOrDeactivateCategory(category)} className="btn btn-sm btn-danger">
+                                                {category.isActive ? "Deactivate" : "Activate"}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </BlurLoader>
                 </div>
             </div>
             {

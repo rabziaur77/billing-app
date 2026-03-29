@@ -4,7 +4,7 @@ import type { Categories } from "../MasterModels/CategoryModel";
 import { API_SERVICE } from "../../../Service/API/API_Service";
 import type { Tax } from "../../invoices/InvoiceModel/Models";
 
-const useProductLogic = (product: ProductModel) => {
+const useProductLogic = (product?: ProductModel) => {
     const [TaxList, setTaxList] = useState<Tax[]>([]);
     const [selectedTax, setSelectedTax] = useState<Tax[]>([]);
     const [isMessageShow, setIsMessageShow] = useState<boolean>(false);
@@ -12,6 +12,8 @@ const useProductLogic = (product: ProductModel) => {
     const [productModel, setProductModel] = useState<ProductModel>();
     const [categoryList, setCategoryList] = useState<Categories[]>([]);
     const [buttonName, setButtonName] = useState<string>("Save Product");
+    const [isBulkLoading, setIsBulkLoading] = useState<boolean>(false);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     useEffect(()=>{
         if(product){
@@ -30,7 +32,7 @@ const useProductLogic = (product: ProductModel) => {
     const fetchCategories = async () => {
         const response = await API_SERVICE.get('/products-api/product/GetAllActiveCategory');
         if (response.status === 200) {
-            const categoryData: Categories[] = response.data.result.map((cat: any) => ({
+            const categoryData: Categories[] = response.data.result.map((cat: { categoryId: string | number, name: string, description: string, isActive: boolean }) => ({
                 categoryId: cat.categoryId,
                 name: cat.name,
                 description: cat.description,
@@ -45,7 +47,7 @@ const useProductLogic = (product: ProductModel) => {
             const response = await API_SERVICE.get('products-api/Tax/GetTaxes');
 
             if (response.status === 200) {
-                const taxList: Tax[] = response.data.result.map((tax: any) => ({
+                const taxList: Tax[] = response.data.result.map((tax: { taxId: string | number, taxName: string, taxRate: number }) => ({
                     id: tax.taxId,
                     name: tax.taxName,
                     rate: tax.taxRate
@@ -110,6 +112,7 @@ const useProductLogic = (product: ProductModel) => {
             discount: productModel?.discount,
             isActive: productModel?.isActive,
             stockQuantity: productModel?.stockQuantity,
+            lowStockThreshold: productModel?.lowStockThreshold,
             taxes: selectedTax.map(tax => ({
                 taxId: tax.id,
                 rate: tax.rate
@@ -130,14 +133,47 @@ const useProductLogic = (product: ProductModel) => {
         setProductModel(prev=>({...prev, [name]: value} as ProductModel));
     }
 
-    const selectedTaxList = (selectedOptions: any) => {
+    const selectedTaxList = (selectedOptions: readonly { value: string | number, label: string }[]) => {
         console.log("Selected Options:", selectedOptions);
-        const selectedIds = selectedOptions.map((opt: any) => opt.value);
+        const selectedIds = selectedOptions.map((opt) => opt.value);
 
         const selectedTaxes = TaxList.filter(tax =>
             selectedIds.includes(tax.id)
         );
         setSelectedTax(selectedTaxes);
+    };
+
+    const onBulkUploadProducts = async (_data: any[], file: File) => {
+        setIsBulkLoading(true);
+        setUploadProgress(0);
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await API_SERVICE.post('/products-api/product/BulkUploadProduct', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+                    setUploadProgress(percentCompleted);
+                }
+            });
+
+            if (response.status === 200) {
+                setPopupMessage(response.data.message || "Products uploaded successfully.");
+            } else {
+                setPopupMessage("Failed to upload products.");
+            }
+        } catch (error: any) {
+            console.error("Error uploading products:", error);
+            setPopupMessage(error.response?.data?.message || "Error uploading products.");
+        } finally {
+            setIsMessageShow(true);
+            setIsBulkLoading(false);
+            setUploadProgress(0);
+        }
     };
 
     return { 
@@ -151,7 +187,10 @@ const useProductLogic = (product: ProductModel) => {
         buttonName,
         isMessageShow,
         closePopup,
-        popupMessage
+        popupMessage,
+        onBulkUploadProducts,
+        isBulkLoading,
+        uploadProgress
     };
 }
 

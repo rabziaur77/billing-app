@@ -8,6 +8,9 @@ const useTaxLogics = () => {
     const [taxes, setTaxes] = useState<Tax[]>([]);
     const [popupVisible, setPopupVisible] = useState<boolean>(false);
     const [popupMessage, setPopupMessage] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isBulkLoading, setIsBulkLoading] = useState<boolean>(false);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     useEffect(() => {
         fetchTaxes();
@@ -26,7 +29,7 @@ const useTaxLogics = () => {
         setIsEditing(false);
     }
 
-    const submitTaxForm= async(e:any)=>{
+    const submitTaxForm= async(e: React.FormEvent)=>{
         e.preventDefault();
 
         if(isEditing && taxModel){
@@ -62,7 +65,7 @@ const useTaxLogics = () => {
         cleanTaxModel();
     }
 
-    const popupMessageHandler = (response: any, successMessage: string, failedMessage: string) => {
+    const popupMessageHandler = (response: { status: number, data: { message?: string } }, successMessage: string, failedMessage: string) => {
         setPopupVisible(true);
         if (response.status === 200) {
             setPopupMessage(successMessage);
@@ -75,20 +78,25 @@ const useTaxLogics = () => {
         setTaxModel({
             id: 0,
             name: "",
-            rate: null as any
+            rate: 0
         });
     }
 
     const fetchTaxes = async () => {
-        const response = await API_SERVICE.get('/products-api/tax/GetTaxes');
-        if (response.status === 200) {
-            const taxData: Tax[] = response.data.result
-            .map((tx: any) => ({
-                id: tx.taxId,
-                name: tx.taxName,
-                rate: tx.taxRate,
-            }));
-            setTaxes(taxData);
+        setIsLoading(true);
+        try {
+            const response = await API_SERVICE.get('/products-api/tax/GetTaxes');
+            if (response.status === 200) {
+                const taxData: Tax[] = response.data.result
+                .map((tx: { taxId: string | number, taxName: string, taxRate: number }) => ({
+                    id: tx.taxId,
+                    name: tx.taxName,
+                    rate: tx.taxRate,
+                }));
+                setTaxes(taxData);
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -106,6 +114,40 @@ const useTaxLogics = () => {
         } as Tax));
     };
 
+    const onBulkUploadTaxes = async (_data: any[], file: File) => {
+        setIsBulkLoading(true);
+        setUploadProgress(0);
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const response = await API_SERVICE.post('/products-api/tax/BulkUploadTax', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+                    setUploadProgress(percentCompleted);
+                }
+            });
+
+            if (response.status === 200) {
+                setPopupMessage(response.data.message || "Taxes uploaded successfully.");
+            } else {
+                setPopupMessage("Failed to upload taxes.");
+            }
+        } catch (error: any) {
+            console.error("Error uploading taxes:", error);
+            setPopupMessage(error.response?.data?.message || "Error uploading taxes.");
+        } finally {
+            setPopupVisible(true);
+            setIsBulkLoading(false);
+            setUploadProgress(0);
+            fetchTaxes();
+        }
+    };
+
     return {
         taxes,
         editTax,
@@ -116,7 +158,11 @@ const useTaxLogics = () => {
         submitTaxForm,
         cancelEdit,
         isEditing,
-        changeEvent
+        changeEvent,
+        isLoading,
+        onBulkUploadTaxes,
+        isBulkLoading,
+        uploadProgress
     };
 }
 

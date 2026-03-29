@@ -31,25 +31,25 @@ export interface InvoiceTaxRequest {
 
 const useGenerateInvoiceLogic = () => {
     const [itemsCost, setItemsCost] = useState({ subTotal: Number(0), taxAmount: Number(0), total: Number(0) });
-    const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
+    const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" });
     const [itemData, setItemData] = useState<LineItem[]>([
         { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
     ]);
     const [InvoiceShow, setInvoiceShow] = useState<boolean>(false);
     const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
-        customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" },
+        customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" },
         subtotal: 0,
         tax: 0,
         total: 0,
         invoiceList: []
     });
 
-    const ItemsData = (item: any) => {
+    const ItemsData = (item: LineItem[]) => {
         console.log("ItemsData", item);
 
-        const subtotal = item.reduce((acc: any, curr: any) => acc + curr.amount, 0);
-        const tax = item.reduce((acc: any, curr: any) => {
-            const taxAmount = curr.taxList.reduce((taxAcc: any, taxCurr: any) => taxAcc + (curr.amount * taxCurr.rate / 100), 0);
+        const subtotal = item.reduce((acc: number, curr: LineItem) => acc + curr.amount, 0);
+        const tax = item.reduce((acc: number, curr: LineItem) => {
+            const taxAmount = curr.taxList.reduce((taxAcc: number, taxCurr: { rate: number }) => taxAcc + (curr.amount * taxCurr.rate / 100), 0);
             return acc + taxAmount;
         }, 0);
         const totalAmount = subtotal + tax;
@@ -102,7 +102,7 @@ const useGenerateInvoiceLogic = () => {
             }
 
             alert(response.data.status);
-            setCustomer({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" });
+            setCustomer({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" });
             setItemData([
                 { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
             ]);
@@ -124,7 +124,7 @@ const useGenerateInvoiceLogic = () => {
             invoiceNumber: receipt.customer.InvoiceNumber,
             customerName: receipt.customer.Name,
             createdBy: 0,
-            customerMobile: "",
+            customerMobile: receipt.customer.CustomerMobile,
             invoiceItems: receipt.invoiceList.map<InvoiceItemRequest>(item => ({
                 productId: item.productId,
                 productName: item.productName,

@@ -11,6 +11,9 @@ import CategoryManage from './Components/Master/CategoryMaster/CategoryManage';
 import ProductManagement from './Components/Master/ProductMaster/ProductManagement';
 import Products from './Components/Master/ProductList/Products';
 import TaxManage from './Components/Master/TaxMaster/TaxManage';
+import RoleManage from './Components/Master/RoleMaster/RoleManage';
+import UserManage from './Components/Master/UserMaster/UserManage';
+import PermissionManage from './Components/Master/PermissionMaster/PermissionManage';
 
 const LoginRedirect = LoginRedirectAuth(Login);
 const AUthDashboard = AuthHOC(Home);
@@ -20,6 +23,10 @@ const InvoiceList = AuthHOC(InvoiceHistory);
 const Category = AuthHOC(CategoryManage);
 const Product = AuthHOC(ProductManagement);
 const ProductList = AuthHOC(Products);
+const Tax = AuthHOC(TaxManage);
+const Role = AuthHOC(RoleManage);
+const User = AuthHOC(UserManage);
+const Permission = AuthHOC(PermissionManage);
 
 function App() {
   return (
@@ -35,7 +42,10 @@ function App() {
             <Route path="/category-management" element={<Category />} />
             <Route path="/product-management" element={<Product />} />
             <Route path="/product-list" element={<ProductList />} />
-            <Route path="/tax-management" element={<TaxManage />} />
+            <Route path="/tax-management" element={<Tax />} />
+            <Route path="/role-management" element={<Role />} />
+            <Route path="/user-management" element={<User />} />
+            <Route path="/permission-management" element={<Permission />} />
           </Route>
         </Routes>
       </AuthProvider>
