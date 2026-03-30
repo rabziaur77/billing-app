@@ -12,7 +12,7 @@ const useInvoiceHistoryLogic = () => {
     const [isInvoiceShow, setIsInvoiceShow] = useState<boolean>(false);
     const [receiptLoading, setReceiptLoading] = useState<boolean>(false);
     const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
-        customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "" },
+        customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" },
         subtotal: 0,
         tax: 0,
         total: 0,
@@ -70,7 +70,8 @@ const useInvoiceHistoryLogic = () => {
                     Name: response.data.response.customer.name,
                     InvoiceDate: response.data.response.customer.invoiceDate,
                     DueDate: response.data.response.customer.dueDate,
-                    InvoiceNumber: response.data.response.customer.invoiceNumber
+                    InvoiceNumber: response.data.response.customer.invoiceNumber,
+                    CustomerMobile: response.data.response.customer.customerMobile || ""
                 };
                 response.data.response.customer = cust;
 

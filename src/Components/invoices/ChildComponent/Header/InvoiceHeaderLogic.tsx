@@ -9,7 +9,7 @@ interface Prop {
 
 const useInvoiceHeader = ({ SetCustomer, IsNewInvoice }: Prop) => {
     const today = new Date().toISOString().split('T')[0];
-    const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: today, DueDate: today, InvoiceNumber: '' });
+    const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: today, DueDate: today, InvoiceNumber: '', CustomerMobile: "" });
 
     useEffect(() => {
         GenerateInvoiceNumber();
