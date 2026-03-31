@@ -30,7 +30,7 @@ const Permission = AuthHOC(PermissionManage);
 
 function App() {
   return (
-    <BrowserRouter basename='/billing-app'>
+    <BrowserRouter>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LoginRedirect />} />

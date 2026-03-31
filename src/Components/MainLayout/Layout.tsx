@@ -47,7 +47,7 @@ const Layout: React.FC = () => {
 
     const handleLogout = () => {
         clearStoredToken();
-        window.location.href = "/billing-app/";
+        window.location.href = "/";
     };
 
     const clearStoredToken = () => {
