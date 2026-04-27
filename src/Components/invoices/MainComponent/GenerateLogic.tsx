@@ -4,14 +4,16 @@ import { API_SERVICE } from "../../../Service/API/API_Service";
 
 /**
  * Custom hook to manage the logic for generating an invoice.
- * It handles the state for items cost, customer details, and item data.
- * It also provides methods to update these states and submit the form.
+ * Handles customer details, line items, GST computation, and form submission.
  */
 export interface InvoiceRequest {
     invoiceNumber: string;
     createdBy: number;
     customerName: string;
     customerMobile?: string;
+    customerGstin?: string;
+    placeOfSupply?: string;
+    invoiceType?: string;
     invoiceItems: InvoiceItemRequest[];
 }
 
@@ -21,6 +23,7 @@ export interface InvoiceItemRequest {
     quantity: number;
     rate: number;
     discount: number;
+    hsnCode?: string;
     invoiceTaxes: InvoiceTaxRequest[];
 }
 
@@ -29,118 +32,188 @@ export interface InvoiceTaxRequest {
     taxPercent: number;
 }
 
+const BLANK_RECEIPT: InvoiceReceipt = {
+    customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" },
+    subtotal: 0, tax: 0, total: 0, invoiceList: [],
+};
+
 const useGenerateInvoiceLogic = () => {
-    const [itemsCost, setItemsCost] = useState({ subTotal: Number(0), taxAmount: Number(0), total: Number(0) });
-    const [customer, setCustomer] = useState<CustomerInvoice>({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" });
+    const [itemsCost, setItemsCost] = useState({ subTotal: 0, taxAmount: 0, total: 0 });
+    const [customer, setCustomer] = useState<CustomerInvoice>({
+        Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "",
+        CustomerMobile: "", CustomerGSTIN: "", PlaceOfSupply: "", InvoiceType: "B2C",
+    });
     const [itemData, setItemData] = useState<LineItem[]>([
         { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
     ]);
     const [InvoiceShow, setInvoiceShow] = useState<boolean>(false);
-    const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>({
-        customer: { Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" },
-        subtotal: 0,
-        tax: 0,
-        total: 0,
-        invoiceList: []
+    const [invoiceReceipt, setInvoiceReceipt] = useState<InvoiceReceipt>(BLANK_RECEIPT);
+    /** Incremented after every successful invoice save to signal child resets. */
+    const [resetKey, setResetKey] = useState(0);
+
+    // ── Payment panel state (shown inside the success popup) ──────────────
+    const [showPaymentPanel, setShowPaymentPanel] = useState(false);
+    const [paymentForm, setPaymentForm] = useState({
+        paymentMode: 'Cash',
+        amountPaid: 0,
+        referenceNumber: '',
+        remarks: '',
     });
+    const [paymentSaving, setPaymentSaving] = useState(false);
+    const [paymentDone, setPaymentDone] = useState(false);
+    const [paymentError, setPaymentError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const ItemsData = (item: LineItem[]) => {
-        console.log("ItemsData", item);
-
-        const subtotal = item.reduce((acc: number, curr: LineItem) => acc + curr.amount, 0);
-        const tax = item.reduce((acc: number, curr: LineItem) => {
-            const taxAmount = curr.taxList.reduce((taxAcc: number, taxCurr: { rate: number }) => taxAcc + (curr.amount * taxCurr.rate / 100), 0);
-            return acc + taxAmount;
-        }, 0);
+        const subtotal = item.reduce((acc, curr) => acc + curr.amount, 0);
+        // Derive tax from the pre-computed grossAmount so CGST+SGST vs IGST
+        // splitting is respected regardless of intra/inter-state mode.
+        const tax = item.reduce((acc, curr) => acc + (curr.grossAmount - curr.amount), 0);
         const totalAmount = subtotal + tax;
-
         setItemsCost({ subTotal: subtotal, taxAmount: tax, total: totalAmount });
         setItemData(item);
-    }
+    };
 
-    const submitForm = (e: React.FormEvent) => {
+    const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!customer.Name || !customer.InvoiceDate || !customer.DueDate || !customer.InvoiceNumber) {
-            alert("Please fill in all customer details.");
+        if (!customer.Name.trim()) {
+            alert("Customer name is required.");
             return;
         }
-        if (itemData.length === 0) {
-            alert("Please add at least one item to the invoice.");
+        if (!customer.InvoiceDate || !customer.DueDate || !customer.InvoiceNumber) {
+            alert("Please fill in all invoice details (date, due date, invoice number).");
             return;
         }
-        if (itemsCost.subTotal <= 0 || itemsCost.taxAmount < 0 || itemsCost.total <= 0) {
-            alert("Please ensure the item costs are valid.");
+        const hasValidItem = itemData.some(i => i.productId > 0 && i.quantity > 0);
+        if (!hasValidItem) {
+            alert("Please add at least one valid item to the invoice.");
             return;
         }
-        // Create the invoice receipt object
-        const invoiceReceipt: InvoiceReceipt = {
-            customer: customer,
+        if (itemsCost.subTotal <= 0) {
+            alert("Invoice total must be greater than zero.");
+            return;
+        }
+
+        const receipt: InvoiceReceipt = {
+            customer,
             subtotal: itemsCost.subTotal,
             tax: itemsCost.taxAmount,
             total: itemsCost.total,
-            invoiceList: itemData
+            invoiceList: itemData,
         };
 
-        const invoiceReq = toInvoiceRequest(invoiceReceipt);
-
-        SaveInvoiceRequest(invoiceReq);
-        setInvoiceReceipt(invoiceReceipt);
-        setInvoiceShow(true);
+        try {
+            setIsSubmitting(true);
+            await SaveInvoiceRequest(toInvoiceRequest(receipt));
+            // ── Show success popup with payment option ──────────────────
+            setInvoiceReceipt(receipt);
+            setPaymentForm(prev => ({ ...prev, amountPaid: itemsCost.total })); // default: full payment
+            setPaymentDone(false);
+            setShowPaymentPanel(false);
+            setInvoiceShow(true);
+        } catch {
+            // Error already alerted inside SaveInvoiceRequest
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    function SetCustomer(customer: CustomerInvoice) {
-        setCustomer(customer);
+    function SetCustomer(c: CustomerInvoice) {
+        setCustomer(c);
     }
 
     const SaveInvoiceRequest = async (invoiceRequest: InvoiceRequest) => {
         try {
             const response = await API_SERVICE.post('/invoice-api/Invoice/SaveInvoiceData', invoiceRequest);
-            // Check if the response is ok (status in the range 200-299)
-
-            if (response.status !== 201) {
+            if (response.status !== 200 && response.status !== 201) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            alert(response.data.status);
-            setCustomer({ Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "", CustomerMobile: "" });
-            setItemData([
-                { productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] },
-            ]);
-            setItemsCost({ subTotal: 0, taxAmount: 0, total: 0 });
-        } catch (error) {
+            const lowStockItems: string[] = response.data?.lowStockWarnings ?? [];
+            if (lowStockItems.length > 0) {
+                alert(`⚠️ Low Stock Warning:\n${lowStockItems.join('\n')}`);
+            }
+            resetForm();
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || error?.message || 'Unknown error';
             console.error("Error saving invoice:", error);
+            alert(`Failed to save invoice: ${msg}`);
             throw error;
         }
     };
 
-    /**
-     * Converts an in‑memory InvoiceReceipt to an outbound InvoiceRequest.
-     * Adds / derives the invoiceNumber so you don’t pollute your receipt model.
-    */
-    function toInvoiceRequest(
-        receipt: InvoiceReceipt
-    ): InvoiceRequest {
+    /** Record payment directly from the invoice success popup. */
+    const handleRecordPayment = async () => {
+        if (paymentForm.amountPaid <= 0) {
+            setPaymentError("Amount must be greater than zero.");
+            return;
+        }
+        if (paymentForm.amountPaid > invoiceReceipt.total + 0.005) {
+            setPaymentError(`Amount (₹${paymentForm.amountPaid}) exceeds invoice total (₹${invoiceReceipt.total.toFixed(2)}).`);
+            return;
+        }
+        setPaymentError(null);
+        setPaymentSaving(true);
+        try {
+            await API_SERVICE.post('invoice-api/Payment/RecordPayment', {
+                invoiceNumber: invoiceReceipt.customer.InvoiceNumber,
+                amountPaid: paymentForm.amountPaid,
+                paymentMode: paymentForm.paymentMode,
+                paymentDate: new Date().toISOString().split('T')[0],
+                referenceNumber: paymentForm.referenceNumber || undefined,
+                remarks: paymentForm.remarks || undefined,
+            });
+            setPaymentDone(true);
+            setShowPaymentPanel(false);
+        } catch (err: any) {
+            const msg = err?.response?.data?.message || err?.message || 'Please try again.';
+            setPaymentError(`Payment failed: ${msg}`);
+        } finally {
+            setPaymentSaving(false);
+        }
+    };
+
+    const resetForm = () => {
+        setCustomer({
+            Name: "",
+            InvoiceDate: "",
+            DueDate: "",
+            InvoiceNumber: "",
+            CustomerMobile: "",
+            CustomerGSTIN: "",
+            PlaceOfSupply: "",
+            InvoiceType: "B2C"
+        });
+        setItemData([{ productId: 0, productName: "", quantity: 1, rate: 0, amount: 0, discount: 0, grossAmount: 0, taxList: [] }]);
+        setItemsCost({ subTotal: 0, taxAmount: 0, total: 0 });
+        // Signal child components to reset their own internal state & reload data
+        setResetKey(prev => prev + 1);
+    };
+
+    function toInvoiceRequest(receipt: InvoiceReceipt): InvoiceRequest {
+        const validItems = receipt.invoiceList.filter(i => i.productId > 0 && i.quantity > 0);
         return {
             invoiceNumber: receipt.customer.InvoiceNumber,
-            customerName: receipt.customer.Name,
-            createdBy: 0,
+            customerName: receipt.customer.Name.trim(),
+            createdBy: 0, // TODO: replace with auth context userId
             customerMobile: receipt.customer.CustomerMobile,
-            invoiceItems: receipt.invoiceList.map<InvoiceItemRequest>(item => ({
+            customerGstin: receipt.customer.CustomerGSTIN,
+            placeOfSupply: receipt.customer.PlaceOfSupply,
+            invoiceType: receipt.customer.InvoiceType,
+            invoiceItems: validItems.map<InvoiceItemRequest>(item => ({
                 productId: item.productId,
                 productName: item.productName,
                 quantity: item.quantity,
                 rate: item.rate,
                 discount: item.discount || 0,
+                hsnCode: item.hsnCode,
                 invoiceTaxes: item.taxList.map(t => ({
                     taxCode: t.name,
-                    taxPercent: t.rate
-                }))
+                    taxPercent: t.rate,
+                })),
             })),
         };
     }
 
-
-    // Your logic here
     return {
         itemsCost,
         ItemsData,
@@ -150,8 +223,19 @@ const useGenerateInvoiceLogic = () => {
         invoiceReceipt,
         InvoiceShow,
         setInvoiceShow,
-        itemData
-    }
+        itemData,
+        resetKey,
+        isSubmitting,
+        // Payment panel
+        showPaymentPanel,
+        setShowPaymentPanel,
+        paymentForm,
+        setPaymentForm,
+        paymentSaving,
+        paymentDone,
+        paymentError,
+        handleRecordPayment,
+    };
 };
 
 export default useGenerateInvoiceLogic;

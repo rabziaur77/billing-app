@@ -9,8 +9,10 @@ export interface Products {
     categoryId: number;
     sku: string;
     stockQuantity: number;
+    lowStockThreshold: number;
     isActive: boolean;
     taxes: ProductTax[];
+    hsnCode?: string;
 }
 
 export interface ProductTax {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { clearStoredToken, getStoredToken, isTokenExpired, setStoredToken } from "./AuthService";
 
-const API_BASE_URL = "https://89-116-21-168.sslip.io/";//"http://localhost:5180/"; 
+const API_BASE_URL = "https://89-116-21-168.sslip.io/"; //"http://localhost:5180/"; 
 
 export const API_SERVICE = axios.create({
   baseURL: API_BASE_URL,
@@ -102,8 +102,8 @@ API_SERVICE.interceptors.request.use(
 API_SERVICE.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response?.status === 429 && error.response?.data === "Too Many Requests") {
-      await axios.get(`${API_BASE_URL}auth-api/Tax/GetTaxes741`);
+    if (error.response?.status === 429) {
+      console.warn('Rate limit hit (429). Please wait before retrying.');
     }
     return Promise.reject(error);
   }

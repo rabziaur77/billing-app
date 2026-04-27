@@ -174,6 +174,28 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ product }) => {
                                 />
                             </div>
                             <div className="col-md-4">
+                                <label htmlFor="hsnCode" className="form-label">
+                                    HSN / SAC Code
+                                    <span
+                                        className="ms-1 text-muted"
+                                        title="Harmonised System of Nomenclature (goods) or Services Accounting Code (services). Required for B2B GST invoices."
+                                        style={{ cursor: 'help', fontSize: '0.8rem' }}
+                                    >ⓘ</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="hsnCode"
+                                    name="hsnCode"
+                                    value={productModel?.hsnCode || ''}
+                                    onChange={changeEvent}
+                                    className="form-control"
+                                    placeholder="e.g. 8471 or 998314"
+                                    maxLength={8}
+                                />
+                                <small className="text-muted">4–8 digits for goods (HSN) · 6 digits for services (SAC)</small>
+                            </div>
+
+                            <div className="col-md-4">
                                 <label htmlFor="productActive" className="form-label">Product Active</label>
                                 <input
                                     type="checkbox"

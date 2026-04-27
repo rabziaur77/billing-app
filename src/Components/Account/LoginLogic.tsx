@@ -26,7 +26,7 @@ const useLoginLogic = () => {
         const body = {
             email: loginModel.email,
             password: loginModel.password,
-            tenantSlug: currentPage.includes("localhost") ? "rabziaur77" : currentPage
+            tenantSlug: currentPage.includes("localhost") ? "billnova" : currentPage
         };
 
         try {

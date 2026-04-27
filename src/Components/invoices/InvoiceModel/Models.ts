@@ -1,5 +1,4 @@
 
-
 export interface Tax {
     id: number;
     name: string;
@@ -11,10 +10,15 @@ export interface LineItem {
     productName: string;
     quantity: number;
     rate: number;
-    discount?: number; // Optional field for discount
+    discount?: number;
     amount: number;
     grossAmount: number;
     taxList: Tax[];
+    /** GST fields (computed from taxList) */
+    hsnCode?: string;
+    cgst?: number;
+    sgst?: number;
+    igst?: number;
 }
 
 export interface CustomerInvoice {
@@ -23,6 +27,21 @@ export interface CustomerInvoice {
     DueDate: string;
     InvoiceNumber: string;
     CustomerMobile: string;
+    /** GST / address fields */
+    CustomerGSTIN?: string;
+    PlaceOfSupply?: string;
+    InvoiceType?: 'B2B' | 'B2C';
+    /** Customer master reference */
+    CustomerId?: number;
+}
+
+export interface GstSummary {
+    taxName: string;
+    taxRate: number;
+    taxableAmount: number;
+    cgst: number;
+    sgst: number;
+    igst: number;
 }
 
 export interface InvoiceReceipt {
@@ -31,6 +50,11 @@ export interface InvoiceReceipt {
     tax: number;
     total: number;
     invoiceList: LineItem[];
+    gstSummary?: GstSummary[];
+    /** Payment status fields (populated when viewing from history) */
+    totalPaid?: number;
+    balanceDue?: number;
+    paymentStatus?: 'Paid' | 'Partial' | 'Unpaid';
 }
 
 export interface InvoiceModel {
@@ -38,6 +62,8 @@ export interface InvoiceModel {
     invoiceNumber: string;
     customerName: string;
     invoiceDate: string;
+    total?: number;
+    paymentStatus?: 'Paid' | 'Partial' | 'Unpaid';
 }
 
 export interface InvoiceInfo {

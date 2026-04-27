@@ -113,12 +113,14 @@ const useProductLogic = (product?: ProductModel) => {
             isActive: productModel?.isActive,
             stockQuantity: productModel?.stockQuantity,
             lowStockThreshold: productModel?.lowStockThreshold,
+            hsnCode: productModel?.hsnCode || '',
             taxes: selectedTax.map(tax => ({
                 taxId: tax.id,
                 rate: tax.rate
             }))
         };
     };
+
 
 
 

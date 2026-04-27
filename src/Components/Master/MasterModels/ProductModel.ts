@@ -13,4 +13,6 @@ export interface ProductModel {
     lowStockThreshold: number;
     isActive: boolean;
     taxes: Tax[];
-}
+    /** HSN (goods) or SAC (services) code for GST compliance */
+    hsnCode?: string;
+}

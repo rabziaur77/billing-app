@@ -5,14 +5,17 @@ import { fetchMyMenus, type MenuItemDTO } from "../../Components/MainLayout/Menu
 export interface UserInfo {
     role: string;
     tenant: string;
+    tenantName: string;
 }
 
 export interface AuthToken {
     role?: string;
-    tenantSlug?: string;
+    tenant?: string;
+    tenantName?: string;
     response?: {
         role?: string;
-        tenantSlug?: string;
+        tenant?: string;
+        tenantName?: string;
         [key: string]: unknown;
     };
     [key: string]: unknown;
@@ -32,11 +35,11 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
-    const [userInfo, setUserInfo] = useState<UserInfo>({role:'', tenant: ''});
+    const [userInfo, setUserInfo] = useState<UserInfo>({ role: '', tenant: '', tenantName: '' });
     const [menuItems, setMenuItems] = useState<MenuItemDTO[]>([]);
     const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(false);
     const navigate = useNavigate();
-    
+
     useEffect(() => {
         const tokenStr = localStorage.getItem('token');
         if (tokenStr) {
@@ -46,18 +49,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     const parsedToken = JSON.parse(tokenStr) as AuthToken;
                     setIsAuthenticated(true);
                     const role = parsedToken.role || parsedToken.response?.role || '';
-                    const tenant = parsedToken.tenantSlug || parsedToken.response?.tenantSlug || '';
-                    setUserInfo({role: role, tenant: tenant});
+                    const tenant = parsedToken.tenant || parsedToken.response?.tenant || '';
+                    const tenantName = parsedToken.tenantName || parsedToken.response?.tenantName || '';
+                    setUserInfo({ role: role, tenant: tenant, tenantName: tenantName });
                 } catch (error) {
                     setIsAuthenticated(false);
                 } finally {
                     setIsReady(true);
                 }
-            }, 1000); 
+            }, 1000);
         }
         else {
             setIsAuthenticated(false);
-            setUserInfo({role: '', tenant: ''});
+            setUserInfo({ role: '', tenant: '', tenantName: '' });
             setIsReady(true);
         }
     }, []);
@@ -86,15 +90,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('token', JSON.stringify(token));
         setIsAuthenticated(true);
         const role = token.role || token.response?.role || '';
-        const tenant = token.tenantSlug || token.response?.tenantSlug || '';
-        setUserInfo({role: role, tenant: tenant});
+        const tenant = token.tenant || token.response?.tenant || '';
+        const tenantName = token.tenantName || token.response?.tenantName || '';
+        setUserInfo({ role: role, tenant: tenant, tenantName: tenantName });
         navigate('/dashboard');
     }
 
     const logout = () => {
         localStorage.removeItem('token');
         setIsAuthenticated(false);
-        setUserInfo({role: '', tenant: ''});
+        setUserInfo({ role: '', tenant: '', tenantName: '' });
         setMenuItems([]);
         navigate('/');
     };

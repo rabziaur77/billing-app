@@ -86,11 +86,28 @@ const Layout: React.FC = () => {
                             menuItems.reduce((acc: any, item) => {
                                 const label = (item.label || "").toLowerCase();
                                 let cat = "General";
-                                if (label.includes("management") || label.includes("master") || label.includes("user") || label.includes("role") || label.includes("permission") || label.includes("product") || label.includes("category") || label.includes("tax")) {
-                                    cat = "Master Data";
-                                } else if (label.includes("invoice") || label.includes("history")) {
+
+                                // ── Transactions ──────────────────────────────
+                                if (label.includes("invoice") || label.includes("history") || label.includes("sales return") || label.includes("payment")) {
                                     cat = "Transactions";
+
+                                // ── User & Access ─────────────────────────────
+                                } else if (label.includes("user") || label.includes("role") || label.includes("permission")) {
+                                    cat = "User & Access";
+
+                                // ── Product Catalog ───────────────────────────
+                                } else if (label.includes("product") || label.includes("category")) {
+                                    cat = "Product Catalog";
+
+                                // ── Tax Setup ─────────────────────────────────
+                                } else if (label.includes("tax")) {
+                                    cat = "Tax Setup";
+
+                                // ── Customer & Vendor ─────────────────────────
+                                } else if (label.includes("customer") || label.includes("vendor") || label.includes("master") || label.includes("management")) {
+                                    cat = "Customer & Vendor";
                                 }
+
                                 if (!acc[cat]) acc[cat] = [];
                                 acc[cat].push(item);
                                 return acc;
@@ -108,7 +125,7 @@ const Layout: React.FC = () => {
                                     <Link
                                         to={item.url || '#'}
                                         className={"menu-item" + (isActive(item.url) ? " active" : "")}
-                                        key={item.label}
+                                        key={item.url || item.label}
                                         title={collapsed ? item.label : ""}
                                     >
                                         <span className="menu-icon">
