@@ -1,7 +1,8 @@
-import axios from "axios";
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { clearStoredToken, getStoredToken, isTokenExpired, setStoredToken } from "./AuthService";
+import { APP_CONFIG } from "../../config/appConfig";
 
-const API_BASE_URL = "https://89-116-21-168.sslip.io/"; //"http://localhost:5180/"; 
+const API_BASE_URL = APP_CONFIG.apiBaseUrl;
 
 export const API_SERVICE = axios.create({
   baseURL: API_BASE_URL,
@@ -9,46 +10,42 @@ export const API_SERVICE = axios.create({
   withCredentials: true,
 });
 
-// ===== Refresh Token Handler =====
 let isRefreshing = false;
-let requestQueue: { resolve: (token: string) => void; reject: (error: any) => void }[] = [];
+let requestQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (error: AxiosError | Error) => void;
+}> = [];
 
-const processQueue = (error: any, newToken: string | null = null) => {
-  requestQueue.forEach((prom) => {
+const processQueue = (error: AxiosError | Error | null, newToken: string | null = null) => {
+  requestQueue.forEach((pendingRequest) => {
     if (error) {
-      prom.reject(error);
+      pendingRequest.reject(error);
     } else {
-      prom.resolve(newToken || "");
+      pendingRequest.resolve(newToken || "");
     }
   });
   requestQueue = [];
 };
 
-// ===== Request Interceptor =====
 API_SERVICE.interceptors.request.use(
-  async (config: any) => {
+  async (config: InternalAxiosRequestConfig) => {
     const tokenData = getStoredToken();
     const accessToken = tokenData?.response?.accessToken;
     const refreshToken = tokenData?.response?.refreshToken;
 
     if (!tokenData) return config;
 
-    // ✅ If token is valid, attach it
     if (accessToken && !isTokenExpired(accessToken)) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${accessToken}`,
-      };
+      config.headers.Authorization = `Bearer ${accessToken}`;
       return config;
     }
 
-    // 🚫 Token expired – avoid multiple refresh calls
     if (!isRefreshing) {
       isRefreshing = true;
 
       try {
         const res = await axios.post(
-          `${API_BASE_URL}auth-api/Account/refreshToken`,
+          `${API_BASE_URL}/auth-api/Account/refreshToken`,
           {
             AccessToken: accessToken || "",
             RefreshToken: refreshToken || "",
@@ -63,34 +60,28 @@ API_SERVICE.interceptors.request.use(
         isRefreshing = false;
         processQueue(null, newTokenData.response.accessToken);
 
-        config.headers = {
-          ...config.headers,
-          Authorization: `Bearer ${newTokenData.response.accessToken}`,
-        };
+        config.headers.Authorization = `Bearer ${newTokenData.response.accessToken}`;
         return config;
-      } catch (err) {
+      } catch (error) {
+        const refreshError = error instanceof Error ? error : new Error("Token refresh failed");
         isRefreshing = false;
-        processQueue(err, null);
+        processQueue(refreshError, null);
         clearStoredToken();
         window.location.href = "/";
-        return Promise.reject(err);
+        return Promise.reject(refreshError);
       }
     }
 
-    // ⏳ Queue requests until refresh done
     return new Promise((resolve, reject) => {
       requestQueue.push({
         resolve: (newToken: string) => {
           if (newToken) {
-            config.headers = {
-              ...config.headers,
-              Authorization: `Bearer ${newToken}`,
-            };
+            config.headers.Authorization = `Bearer ${newToken}`;
           }
           resolve(config);
         },
-        reject: (err: any) => {
-          reject(err);
+        reject: (error: AxiosError | Error) => {
+          reject(error);
         },
       });
     });
@@ -98,10 +89,9 @@ API_SERVICE.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ===== Response Interceptor =====
 API_SERVICE.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  async (error: AxiosError) => {
     if (error.response?.status === 429) {
       console.warn('Rate limit hit (429). Please wait before retrying.');
     }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { API_SERVICE } from "../../Service/API/API_Service";
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -96,7 +96,7 @@ const useIndexLogic = () => {
         }
     };
 
-    const fetchTableData = async () => {
+    const fetchTableData = useCallback(async () => {
         setIsTableLoading(true);
         try {
             const response = await API_SERVICE.get(`invoice-api/SaleInvoice/RecentTransaction?transactionType=${recentState}`);
@@ -111,7 +111,7 @@ const useIndexLogic = () => {
         } finally {
             setIsTableLoading(false);
         }
-    };
+    }, [recentState]);
 
     // Initial data load
     useEffect(() => {
@@ -122,8 +122,8 @@ const useIndexLogic = () => {
 
     // Handle recentState changes
     useEffect(() => {
-        fetchTableData();
-    }, [recentState]);
+        void fetchTableData();
+    }, [fetchTableData]);
 
     return {
         monthlySales,

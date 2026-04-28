@@ -5,8 +5,8 @@ import InvoiceSubtotal from "../ChildComponent/TotalCalc/SubTotalCal";
 import InvoiceView from "../InvoiceDownload/InvoiceView";
 import useGenerateInvoiceLogic from "./GenerateLogic";
 import PopupView from "../../CommonComp/PopupView";
+import { APP_CONFIG } from "../../../config/appConfig";
 
-const SELLER_STATE = "Maharashtra";
 const PAYMENT_MODES = ["Cash", "UPI", "Cheque", "Bank Transfer", "Card"];
 
 const CreateInvoicePage: React.FC = () => {
@@ -33,10 +33,11 @@ const CreateInvoicePage: React.FC = () => {
         handleRecordPayment,
     } = useGenerateInvoiceLogic();
 
+    const sellerState = APP_CONFIG.sellerState;
     const placeOfSupply = customer.PlaceOfSupply || "";
     const isInterState =
         !!placeOfSupply &&
-        SELLER_STATE.toLowerCase().trim() !== placeOfSupply.toLowerCase().trim();
+        sellerState.toLowerCase().trim() !== placeOfSupply.toLowerCase().trim();
 
     return (
         <div className="container-fluid my-4 px-4">
@@ -50,7 +51,7 @@ const CreateInvoicePage: React.FC = () => {
                     items={itemData}
                     ItemData={ItemsData}
                     placeOfSupply={placeOfSupply}
-                    sellerState={SELLER_STATE}
+                    sellerState={sellerState}
                     reloadTrigger={resetKey}
                 />
 
@@ -69,7 +70,7 @@ const CreateInvoicePage: React.FC = () => {
             {InvoiceShow && (
                 <PopupView onClose={() => setInvoiceShow(false)}>
                     {/* ── Invoice Preview ── */}
-                    <InvoiceView invoiceData={invoiceReceipt} sellerState={SELLER_STATE} />
+                    <InvoiceView invoiceData={invoiceReceipt} sellerState={sellerState} />
 
                     <hr className="my-3" />
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { API_SERVICE } from '../../Service/API/API_Service';
 import { useAuth } from '../../Service/ContextService/AuthContext';
+import { resolveTenantSlug } from '../../config/appConfig';
 
 const useLoginLogic = () => {
     const auth = useAuth();
@@ -21,12 +22,10 @@ const useLoginLogic = () => {
             return;
         }
 
-        const currentPage = window.location.hostname.split(".")[0];
-
         const body = {
             email: loginModel.email,
             password: loginModel.password,
-            tenantSlug: currentPage.includes("localhost") ? "billnova" : currentPage
+            tenantSlug: resolveTenantSlug(window.location.hostname)
         };
 
         try {

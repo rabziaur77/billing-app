@@ -1,8 +1,12 @@
 {
-  "name": "billing-app",
-  "private": true,
-  "version": "0.0.0",
+  "name": "billnova-billing-app",
+  "private": false,
+  "version": "1.0.0",
+  "description": "Multi-tenant GST billing and payment tracking app for Indian SMEs.",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -27,6 +31,16 @@
     "react-router-dom": "^7.6.2",
     "react-select": "^5.10.1"
   },
+  "keywords": [
+    "billing",
+    "gst",
+    "invoice",
+    "payments",
+    "react",
+    "india"
+  ],
+  "author": "Shoaib",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@testing-library/react": "^16.3.2",

@@ -1,25 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchMyMenus, type MenuItemDTO } from "../../Components/MainLayout/MenuService";
+import {
+    clearStoredToken,
+    extractUserId,
+    getStoredToken,
+    setStoredToken,
+    type StoredAuthToken,
+} from "../API/AuthService";
 
 export interface UserInfo {
+    userId: number | null;
     role: string;
     tenant: string;
     tenantName: string;
 }
 
-export interface AuthToken {
-    role?: string;
-    tenant?: string;
-    tenantName?: string;
-    response?: {
-        role?: string;
-        tenant?: string;
-        tenantName?: string;
-        [key: string]: unknown;
-    };
-    [key: string]: unknown;
-}
+export type AuthToken = StoredAuthToken;
 
 export interface AuthContextType {
     isAuthenticated: boolean;
@@ -30,40 +27,41 @@ export interface AuthContextType {
     logout: () => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const EMPTY_USER_INFO: UserInfo = {
+    userId: null,
+    role: '',
+    tenant: '',
+    tenantName: '',
+};
+
+const buildUserInfo = (token: AuthToken): UserInfo => ({
+    userId: extractUserId(token),
+    role: token.role || token.response?.role || '',
+    tenant: token.tenant || token.response?.tenant || '',
+    tenantName: token.tenantName || token.response?.tenantName || '',
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
-    const [userInfo, setUserInfo] = useState<UserInfo>({ role: '', tenant: '', tenantName: '' });
+    const [userInfo, setUserInfo] = useState<UserInfo>(EMPTY_USER_INFO);
     const [menuItems, setMenuItems] = useState<MenuItemDTO[]>([]);
     const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const tokenStr = localStorage.getItem('token');
-        if (tokenStr) {
-            setTimeout(() => {
-                try {
-                    // Simulate an API call to validate the parsedToken 
-                    const parsedToken = JSON.parse(tokenStr) as AuthToken;
-                    setIsAuthenticated(true);
-                    const role = parsedToken.role || parsedToken.response?.role || '';
-                    const tenant = parsedToken.tenant || parsedToken.response?.tenant || '';
-                    const tenantName = parsedToken.tenantName || parsedToken.response?.tenantName || '';
-                    setUserInfo({ role: role, tenant: tenant, tenantName: tenantName });
-                } catch (error) {
-                    setIsAuthenticated(false);
-                } finally {
-                    setIsReady(true);
-                }
-            }, 1000);
-        }
-        else {
+        const storedToken = getStoredToken();
+        if (storedToken) {
+            setIsAuthenticated(true);
+            setUserInfo(buildUserInfo(storedToken));
+        } else {
             setIsAuthenticated(false);
-            setUserInfo({ role: '', tenant: '', tenantName: '' });
-            setIsReady(true);
+            setUserInfo(EMPTY_USER_INFO);
         }
+        setIsReady(true);
     }, []);
 
     useEffect(() => {
@@ -83,27 +81,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        loadMenu();
+        void loadMenu();
     }, [isAuthenticated]);
 
     const login = (token: AuthToken) => {
-        localStorage.setItem('token', JSON.stringify(token));
+        setStoredToken(token);
         setIsAuthenticated(true);
-        const role = token.role || token.response?.role || '';
-        const tenant = token.tenant || token.response?.tenant || '';
-        const tenantName = token.tenantName || token.response?.tenantName || '';
-        setUserInfo({ role: role, tenant: tenant, tenantName: tenantName });
+        setUserInfo(buildUserInfo(token));
         navigate('/dashboard');
-    }
+    };
 
     const logout = () => {
-        localStorage.removeItem('token');
+        clearStoredToken();
         setIsAuthenticated(false);
-        setUserInfo({ role: '', tenant: '', tenantName: '' });
+        setUserInfo(EMPTY_USER_INFO);
         setMenuItems([]);
         navigate('/');
     };
-
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, login, logout, userInfo, menuItems, isLoadingMenu }}>
@@ -112,11 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {
         throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
-}
+};

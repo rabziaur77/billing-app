@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { CustomerInvoice, LineItem, InvoiceReceipt } from "../InvoiceModel/Models";
 import { API_SERVICE } from "../../../Service/API/API_Service";
+import { useAuth } from "../../../Service/ContextService/AuthContext";
 
 /**
  * Custom hook to manage the logic for generating an invoice.
@@ -37,7 +38,21 @@ const BLANK_RECEIPT: InvoiceReceipt = {
     subtotal: 0, tax: 0, total: 0, invoiceList: [],
 };
 
+function getErrorMessage(error: unknown, fallback: string): string {
+    if (typeof error === "object" && error !== null) {
+        const response = (error as { response?: { data?: { message?: string } } }).response;
+        const responseMessage = response?.data?.message;
+        if (responseMessage) return responseMessage;
+
+        const runtimeMessage = (error as { message?: string }).message;
+        if (runtimeMessage) return runtimeMessage;
+    }
+
+    return fallback;
+}
+
 const useGenerateInvoiceLogic = () => {
+    const { userInfo } = useAuth();
     const [itemsCost, setItemsCost] = useState({ subTotal: 0, taxAmount: 0, total: 0 });
     const [customer, setCustomer] = useState<CustomerInvoice>({
         Name: "", InvoiceDate: "", DueDate: "", InvoiceNumber: "",
@@ -133,8 +148,8 @@ const useGenerateInvoiceLogic = () => {
                 alert(`⚠️ Low Stock Warning:\n${lowStockItems.join('\n')}`);
             }
             resetForm();
-        } catch (error: any) {
-            const msg = error?.response?.data?.message || error?.message || 'Unknown error';
+        } catch (error: unknown) {
+            const msg = getErrorMessage(error, 'Unknown error');
             console.error("Error saving invoice:", error);
             alert(`Failed to save invoice: ${msg}`);
             throw error;
@@ -164,8 +179,8 @@ const useGenerateInvoiceLogic = () => {
             });
             setPaymentDone(true);
             setShowPaymentPanel(false);
-        } catch (err: any) {
-            const msg = err?.response?.data?.message || err?.message || 'Please try again.';
+        } catch (error: unknown) {
+            const msg = getErrorMessage(error, 'Please try again.');
             setPaymentError(`Payment failed: ${msg}`);
         } finally {
             setPaymentSaving(false);
@@ -194,7 +209,7 @@ const useGenerateInvoiceLogic = () => {
         return {
             invoiceNumber: receipt.customer.InvoiceNumber,
             customerName: receipt.customer.Name.trim(),
-            createdBy: 0, // TODO: replace with auth context userId
+            createdBy: userInfo.userId ?? 0,
             customerMobile: receipt.customer.CustomerMobile,
             customerGstin: receipt.customer.CustomerGSTIN,
             placeOfSupply: receipt.customer.PlaceOfSupply,

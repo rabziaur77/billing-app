@@ -5,11 +5,10 @@ import PopupView from "../CommonComp/PopupView";
 import InvoiceView from "../invoices/InvoiceDownload/InvoiceView";
 import BlurLoader from "../CommonComp/BlurLoader";
 import Payments from "../Payments/Payments";
-
-// Seller state – should match what's set in Generate.tsx
-const SELLER_STATE = "Maharashtra";
+import { APP_CONFIG } from "../../config/appConfig";
 
 const InvoiceHistory: React.FC = () => {
+    const sellerState = APP_CONFIG.sellerState;
     const {
         invoices, InvoiceSelected,
         GetInvoiceHistory, invoiceInfo, closeInfo,
@@ -69,20 +68,18 @@ const InvoiceHistory: React.FC = () => {
                 </div>
             </div>
 
-            {/* Receipt popup */}
             {isInvoiceShow && (
                 <PopupView onClose={() => setIsInvoiceShow(false)}>
                     <BlurLoader isLoading={receiptLoading} minHeight="400px" loadingText="Generating Receipt...">
-                        <InvoiceView invoiceData={invoiceReceipt} sellerState={SELLER_STATE} />
+                        <InvoiceView invoiceData={invoiceReceipt} sellerState={sellerState} />
                     </BlurLoader>
                 </PopupView>
             )}
 
-            {/* Quick Record Payment modal from history row */}
             {showPaymentModal && (
                 <PopupView onClose={() => setShowPaymentModal(false)}>
                     <div className="p-3">
-                        <h5 className="mb-3">Record Payment — {paymentInvoice}</h5>
+                        <h5 className="mb-3">Record Payment - {paymentInvoice}</h5>
                         <Payments initialInvoiceNumber={paymentInvoice} />
                     </div>
                 </PopupView>

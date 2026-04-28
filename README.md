@@ -1,54 +1,57 @@
-# React + TypeScript + Vite
+# BillNova Billing App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BillNova is a multi-tenant GST billing frontend built with React, TypeScript, and Vite. It is designed for Indian small and mid-sized businesses that need fast invoice generation, customer master management, payment tracking, and sales return handling.
 
-Currently, two official plugins are available:
+## Core capabilities
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- GST invoice creation with intra-state and inter-state tax handling
+- Customer and vendor master management
+- Product, category, and tax masters
+- Invoice history and printable invoice view
+- Payment recording with partial and full settlement support
+- Sales returns
+- Role-based menu access from the auth backend
 
-## Expanding the ESLint configuration
+## Tech stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 19
+- TypeScript
+- Vite
+- Bootstrap 5
+- Axios
+- Vitest
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Environment setup
+
+Create a `.env` file in the project root from `.env.example`.
+
+```env
+VITE_APP_NAME=BillNova
+VITE_API_BASE_URL=https://your-api-host.example.com
+VITE_DEFAULT_TENANT_SLUG=billnova
+VITE_SELLER_STATE=Maharashtra
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+npm run test:run
 ```
+
+## Runtime requirements
+
+- Node.js 20 or newer is recommended
+
+## Deployment notes
+
+- `VITE_API_BASE_URL` should point to your production API gateway or backend host.
+- `VITE_DEFAULT_TENANT_SLUG` is used for local development and non-subdomain hosts.
+- `VITE_SELLER_STATE` controls GST seller-state comparisons used in invoice rendering.
+
+## Current scope
+
+This repository contains the frontend application. It expects compatible backend services for auth, invoice, payment, master-data, and reporting endpoints.
